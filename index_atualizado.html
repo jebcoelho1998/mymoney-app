@@ -1,0 +1,4600 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Management Money</title>
+
+  <style>
+    :root {
+      --ft-pink: #FFF1E0;
+      --ft-pink-soft: #FFF9F5;
+      --ft-pink-deep: #F2DFCE;
+      --ft-ink: #26221C;
+      --ft-ink-soft: #5F5142;
+      --ft-accent: #D9A066;
+      --ft-accent-soft: #F8E3C4;
+      --ft-accent-dark: #8B5E3C;
+      --ft-maroon: #8F223A;
+      --border-soft: #E2C8B6;
+
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.18);
+      --shadow-light: 0 8px 24px rgba(15, 23, 42, 0.10);
+
+      --muted: #6B5A4A;
+      --danger: #B91C1C;
+      --success: #166534;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #3B2518 0, #1A1410 40%, #0B0908 75%);
+      color: var(--ft-ink);
+    }
+
+    /* ---------- AUTH (LOGIN / REGISTO) ---------- */
+
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #3B2518 0, #120E0B 55%, #050404 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 100;
+    }
+
+    .auth-shell {
+      position: relative;
+      max-width: 960px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.1fr);
+      background: linear-gradient(145deg, #2A1A11, #110D0B);
+      border-radius: 18px;
+      border: 1px solid rgba(226, 200, 182, 0.45);
+      box-shadow: 0 26px 80px rgba(0, 0, 0, 0.75);
+      overflow: hidden;
+    }
+
+    .auth-shell::after {
+      content: "Clareza · Disciplina · Consistência";
+      position: absolute;
+      bottom: 0.7rem;
+      left: 1.8rem;
+      font-size: 0.75rem;
+      color: rgba(248, 231, 208, 0.65);
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .auth-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .auth-shell::after {
+        left: 1.3rem;
+      }
+    }
+
+    .auth-info {
+      padding: 1.7rem 1.8rem;
+      border-right: 1px solid rgba(226, 200, 182, 0.35);
+      background:
+        radial-gradient(circle at top left, rgba(241, 215, 184, 0.18), transparent 55%),
+        linear-gradient(145deg, #2A1B11, #1A120D);
+      color: #F8E7D3;
+    }
+
+    .auth-info-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .auth-info-subtitle {
+      font-size: 0.95rem;
+      color: rgba(248, 231, 208, 0.78);
+      margin-bottom: 1.2rem;
+    }
+
+    .auth-info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(217, 160, 102, 0.8);
+      color: #FCEBD4;
+      font-size: 0.75rem;
+      margin-bottom: 0.8rem;
+      background: radial-gradient(circle at top, rgba(217,160,102,0.28), transparent 70%);
+    }
+
+    .auth-info-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.9rem;
+      color: rgba(248, 231, 208, 0.86);
+    }
+
+    .auth-info-list li {
+      margin-bottom: 0.55rem;
+    }
+
+    .auth-card {
+      background: radial-gradient(circle at top right, rgba(217,160,102,0.18), #050404 70%);
+      padding: 1.6rem 1.8rem;
+      color: #EAE0D6;
+    }
+
+    .auth-tabs {
+      display: inline-flex;
+      border-radius: 999px;
+      border: 1px solid rgba(226, 200, 182, 0.55);
+      padding: 0.15rem;
+      margin-bottom: 1rem;
+      background: rgba(10, 8, 7, 0.85);
+    }
+
+    .auth-tab-button {
+      border: none;
+      background: transparent;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: rgba(234, 224, 214, 0.7);
+      transition: background 0.16s ease, color 0.16s ease, transform 0.08s ease;
+    }
+
+    .auth-tab-button.active {
+      background: radial-gradient(circle at top, #D9A066, #8B5E3C);
+      color: #0B0705;
+      font-weight: 600;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+    }
+
+    .auth-panel {
+      display: none;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    .auth-panel.active { display: block; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      color: rgba(234, 224, 214, 0.78);
+    }
+
+    .field input,
+    .field select {
+      border-radius: 999px;
+      border: 1px solid rgba(226, 200, 182, 0.55);
+      padding: 0.48rem 0.9rem;
+      font-size: 0.85rem;
+      outline: none;
+      background: rgba(12, 9, 7, 0.92);
+      color: #F5E9DD;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease, transform 0.06s ease;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #D9A066;
+      box-shadow: 0 0 0 1px rgba(217, 160, 102, 0.35);
+      background: #120D0A;
+      transform: translateY(-1px);
+    }
+
+    .helper {
+      font-size: 0.75rem;
+      color: rgba(209, 196, 184, 0.8);
+    }
+
+    .button {
+      border-radius: 999px;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.18s ease, transform 0.08s ease, box-shadow 0.18s ease, border-color 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .button-primary {
+      background: radial-gradient(circle at top, #D9A066, #8B5E3C);
+      color: #0B0705;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.82);
+      border: 1px solid rgba(245, 219, 189, 0.2);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9);
+    }
+
+    .button-outline {
+      background: transparent;
+      color: #F5E9DD;
+      border: 1px solid rgba(226, 200, 182, 0.6);
+    }
+
+    .button-outline:hover {
+      background: rgba(226, 200, 182, 0.08);
+    }
+
+    .button-ghost {
+      background: transparent;
+      color: rgba(248, 231, 208, 0.85);
+      border: 1px dashed rgba(226, 200, 182, 0.6);
+    }
+
+    .button-ghost:hover {
+      background: rgba(226, 200, 182, 0.08);
+    }
+
+    .button-xs {
+      padding: 0.3rem 0.7rem;
+      font-size: 0.75rem;
+    }
+
+    .auth-note {
+      font-size: 0.8rem;
+      color: rgba(209, 196, 184, 0.9);
+      margin-top: 0.7rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- APP SHELL ---------- */
+
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #F5E9DD;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(90deg, rgba(15, 10, 6, 0.96), rgba(17, 12, 8, 0.94));
+      border-bottom: 1px solid rgba(226, 200, 182, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1.6rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .brand-text-main {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .brand-text-sub {
+      font-size: 0.75rem;
+      color: rgba(229, 231, 235, 0.7);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .nav-button {
+      border: none;
+      background: transparent;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      color: rgba(229, 231, 235, 0.7);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: background 0.18s ease, color 0.18s ease, transform 0.08s ease;
+    }
+
+    .nav-button span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: transparent;
+      display: inline-block;
+    }
+
+    .nav-button.active {
+      background: radial-gradient(circle at top, #D9A066, #8B5E3C);
+      color: #0B0705;
+      font-weight: 600;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.8);
+    }
+
+    .nav-button.active span.dot { background: #1F130C; }
+
+    .nav-button:hover {
+      background: rgba(217,160,102,0.12);
+      transform: translateY(-1px);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: 360px;
+    }
+
+    .pill {
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 116, 83, 0.8);
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(17, 12, 8, 0.8);
+      color: #E5D5C3;
+    }
+
+    .pill-badge {
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(217,160,102,0.18);
+      color: #F9E7D2;
+      font-size: 0.68rem;
+    }
+
+    .date-chip {
+      font-size: 0.78rem;
+      color: rgba(229, 231, 235, 0.78);
+    }
+
+    .user-chip {
+      font-size: 0.78rem;
+      color: rgba(229, 231, 235, 0.8);
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 820px) {
+      .brand-text-sub { display: none; }
+      .nav-right { max-width: 100%; }
+      .user-chip { display: none; }
+    }
+
+    .content {
+      padding: 1.5rem clamp(1rem, 3vw, 2.4rem);
+      max-width: 1180px;
+      margin: 0 auto 2.2rem;
+      width: 100%;
+    }
+
+    /* NAVBAR DE SOMA DE POUPANÇA */
+
+    .savings-nav {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) auto minmax(0, 1.1fr);
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding: 0.9rem 1.1rem;
+      background: radial-gradient(circle at top left, rgba(217,160,102,0.22), rgba(10,8,6,0.96));
+      border-radius: 18px;
+      border: 1px solid rgba(226,200,182,0.45);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.78);
+    }
+
+    @media (max-width: 900px) {
+      .savings-nav {
+        grid-template-columns: minmax(0, 1fr);
+        align-items: flex-start;
+      }
+    }
+
+    .savings-title {
+      font-size: 0.86rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(252, 244, 232, 0.9);
+      margin-bottom: 0.25rem;
+    }
+
+    .savings-subtitle {
+      font-size: 0.85rem;
+      color: rgba(230, 213, 194, 0.9);
+      max-width: 400px;
+    }
+
+    .savings-controls {
+      display: inline-flex;
+      border-radius: 999px;
+      border: 1px solid rgba(226,200,182,0.6);
+      padding: 0.15rem;
+      background: rgba(10,8,6,0.9);
+      justify-content: center;
+    }
+
+    .savings-tab {
+      border: none;
+      background: transparent;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      color: rgba(230, 213, 194, 0.7);
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .savings-tab.active {
+      background: radial-gradient(circle at top, #F5E1C5, #D9A066);
+      color: #1A120C;
+      font-weight: 600;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.78);
+    }
+
+    .savings-main {
+      text-align: right;
+    }
+
+    @media (max-width: 900px) {
+      .savings-main {
+        text-align: left;
+      }
+    }
+
+    .savings-value {
+      font-size: 1.4rem;
+      font-weight: 600;
+      font-family: "Georgia", "Times New Roman", serif;
+    }
+
+    .savings-caption {
+      font-size: 0.8rem;
+      color: rgba(230,213,194,0.85);
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .page-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 1.45rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+      color: #F7E6D5;
+    }
+
+    .page-subtitle {
+      font-size: 0.9rem;
+      color: rgba(230, 213, 194, 0.9);
+      max-width: 500px;
+      line-height: 1.5;
+    }
+
+    .month-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: radial-gradient(circle at top left, rgba(217,160,102,0.24), rgba(10,8,6,0.96));
+      padding: 0.6rem 0.9rem;
+      border-radius: 999px;
+      box-shadow: var(--shadow-light);
+      border: 1px solid rgba(226,200,182,0.5);
+    }
+
+    .month-selector label {
+      font-size: 0.8rem;
+      color: rgba(230, 213, 194, 0.9);
+    }
+
+    .month-selector input[type="month"] {
+      border: none;
+      background: transparent;
+      font-size: 0.85rem;
+      padding: 0.2rem 1.4rem 0.2rem 0.3rem;
+      outline: none;
+      color: #F7E6D5;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+    }
+
+    .month-selector {
+      position: relative;
+    }
+
+    .month-selector::after {
+      content: "";
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #F8E3C4, #D9A066);
+      box-shadow: 0 0 0 1px rgba(248,227,196,0.35);
+      pointer-events: none;
+    }
+
+    .month-selector input[type="month"]::-webkit-calendar-picker-indicator {
+      opacity: 0;
+      -webkit-appearance: none;
+      cursor: pointer;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.9fr) minmax(0, 1.5fr);
+      gap: 1.1rem;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 960px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(217,160,102,0.18), #110D0A);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(226,200,182,0.5);
+      box-shadow: var(--shadow-soft);
+      padding: 1.1rem 1.25rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #F5E1C5;
+    }
+
+    .card-subtitle {
+      font-size: 0.78rem;
+      color: rgba(230, 213, 194, 0.85);
+      max-width: 360px;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(5,4,3,0.8);
+      border: 1px solid rgba(226,200,182,0.6);
+      color: rgba(245, 225, 200, 0.9);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 900px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .summary-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .summary-card {
+      background: radial-gradient(circle at top left, rgba(217,160,102,0.16), rgba(13,10,8,0.96));
+      border-radius: var(--radius-md);
+      padding: 0.75rem 0.85rem;
+      border: 1px solid rgba(226,200,182,0.55);
+    }
+
+    .summary-label {
+      font-size: 0.76rem;
+      color: rgba(230, 213, 194, 0.86);
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-value {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #FDF5ED;
+    }
+
+    .summary-value.positive { color: var(--success); }
+    .summary-value.negative { color: var(--danger); }
+
+    .summary-tag {
+      font-size: 0.7rem;
+      margin-top: 0.2rem;
+      color: rgba(209, 196, 184, 0.9);
+    }
+
+    .summary-grid-daily {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    @media (max-width: 820px) {
+      .summary-grid-daily {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem 1rem;
+    }
+
+    @media (max-width: 720px) {
+      .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .field-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .info-line {
+      font-size: 0.75rem;
+      color: rgba(209, 196, 184, 0.9);
+      margin-top: 0.5rem;
+    }
+
+    .info-line strong { color: #F7E6D5; }
+
+    .table-wrapper {
+      width: 100%;
+      overflow: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(226,200,182,0.55);
+      background: radial-gradient(circle at top left, rgba(217,160,102,0.14), #0B0908);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 700px;
+    }
+
+    thead { background: rgba(26, 18, 12, 0.98); }
+
+    th, td {
+      padding: 0.55rem 0.7rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(226,200,182,0.4);
+      color: #F5E9DD;
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 0.76rem;
+      color: rgba(248, 231, 208, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .tag {
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid transparent;
+    }
+
+    .tag-expense {
+      background: rgba(127, 29, 29, 0.28);
+      color: #FCA5A5;
+      border-color: rgba(248, 113, 113, 0.5);
+    }
+
+    .tag-income {
+      background: rgba(22, 101, 52, 0.3);
+      color: #BBF7D0;
+      border-color: rgba(74, 222, 128, 0.5);
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    .section.active { display: block; }
+
+    /* CAMPOS DE DATA COM LAYOUT MELHOR */
+
+    .date-field {
+      position: relative;
+    }
+
+    .date-field input[type="date"],
+    .date-field input[type="month"],
+    .date-field input[type="number"] {
+      padding-left: 2.8rem;
+      cursor: pointer;
+      height: 44px;
+      line-height: 1.1;
+      border-radius: 22px;
+    }
+
+    /* Ícone premium de calendário (sem emoji, estilo discreto) */
+    .date-field::before {
+      content: "";
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0.9rem;
+      height: 0.9rem;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #F8E3C4, #D9A066);
+      box-shadow: 0 0 0 1px rgba(248,227,196,0.45);
+      pointer-events: none;
+    }
+
+    /* Melhor alinhamento do botão indicador em Chrome/Safari */
+    .date-field input[type="date"]::-webkit-calendar-picker-indicator {
+      position: absolute;
+      right: 0.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      opacity: 0.9;
+      cursor: pointer;
+      border-radius: 999px;
+      background: transparent;
+      color: transparent;
+    }
+
+    .date-field input[type="date"]::-webkit-calendar-picker-indicator,
+    .date-field input[type="month"]::-webkit-calendar-picker-indicator {
+      opacity: 0;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    /* Remover setas básicas dos campos numéricos */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+        input[type="file"] {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 999px;
+      border: 1px solid rgba(226,200,182,0.7);
+      background: radial-gradient(circle at top left, rgba(248,227,196,0.08), rgba(0,0,0,0.9));
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+      color: rgba(247,230,213,0.95);
+      cursor: pointer;
+    }
+
+    input[type="file"]::file-selector-button {
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #D9A066, #8B5E3C);
+      color: #120C08;
+      font-weight: 600;
+      font-size: 0.78rem;
+      padding: 0.35rem 0.9rem;
+      margin-right: 0.7rem;
+      cursor: pointer;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+      filter: brightness(1.03);
+    }
+
+    /* (removido bloco duplicado) */
+
+    /* ---------- CALENDÁRIO ---------- */
+
+    .calendar-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 960px) {
+      .calendar-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .calendar-shell {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(226,200,182,0.55);
+      background: radial-gradient(circle at top left, rgba(217,160,102,0.16), rgba(11,9,8,0.96));
+      padding: 0.8rem 0.9rem;
+      box-shadow: var(--shadow-light);
+    }
+
+    .calendar-header-text {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.78rem;
+      color: rgba(230, 213, 194, 0.85);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.25rem;
+      font-size: 0.75rem;
+    }
+
+    .calendar-weekday {
+      text-align: center;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.7rem;
+      color: rgba(230, 213, 194, 0.8);
+      padding-bottom: 0.25rem;
+    }
+
+    .calendar-day {
+      min-height: 74px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(226,200,182,0.55);
+      background: rgba(15, 11, 9, 0.94);
+      padding: 0.35rem 0.4rem;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      transition: border-color 0.14s ease, box-shadow 0.14s ease, transform 0.08s ease, background 0.14s ease;
+    }
+
+    .calendar-day-empty {
+      border: none;
+      background: transparent;
+      cursor: default;
+    }
+
+    .calendar-day:hover:not(.calendar-day-empty) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+    }
+
+    .calendar-day-number {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #FCEBD4;
+    }
+
+    .calendar-day-info {
+      margin-top: 0.15rem;
+      font-size: 0.7rem;
+      color: rgba(230, 213, 194, 0.88);
+      line-height: 1.25;
+    }
+
+    .calendar-day.salary-day {
+      border-color: #D9A066;
+      box-shadow: 0 0 0 1px rgba(217,160,102,0.45), 0 10px 22px rgba(0,0,0,0.8);
+    }
+
+    .calendar-day.has-expense { background: rgba(127,29,29,0.42); }
+    .calendar-day.has-income  { background: rgba(22,101,52,0.4); }
+    .calendar-day.has-both    { background: rgba(147, 51, 234, 0.42); }
+
+    .calendar-day.selected {
+      box-shadow: 0 0 0 1px #FCEBD4, 0 12px 28px rgba(0,0,0,0.9);
+      border-color: #FCEBD4;
+    }
+
+    /* ---------- GRÁFICOS (TRANSPARENTES / CASTANHO) ---------- */
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .charts-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .chart-card {
+      background: radial-gradient(circle at top left, rgba(217,160,102,0.14), rgba(11,9,8,0.96));
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(226,200,182,0.55);
+      padding: 0.85rem 0.9rem 0.9rem;
+      box-shadow: var(--shadow-light);
+    }
+
+    .chart-header {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.45rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      color: #F5E1C5;
+    }
+
+    .chart-caption {
+      font-size: 0.72rem;
+      color: rgba(209, 196, 184, 0.9);
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 230px;
+      background: transparent !important;
+    }
+
+    /* ---------- EXPORT ---------- */
+
+    .export-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 960px) {
+      .export-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .export-note {
+      font-size: 0.8rem;
+      color: rgba(230, 213, 194, 0.92);
+      line-height: 1.5;
+    }
+
+    .badge-soft {
+      background: rgba(217,160,102,0.28);
+      color: #FCEBD4;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(226,200,182,0.55);
+    }
+
+    /* ---------- MODAIS ---------- */
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 3, 3, 0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 120;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: radial-gradient(circle at top left, rgba(217,160,102,0.16), #0C0907);
+      border-radius: 14px;
+      border: 1px solid rgba(226,200,182,0.5);
+      box-shadow: 0 26px 70px rgba(0,0,0,0.95);
+      max-width: 480px;
+      width: 100%;
+      padding: 1.1rem 1.3rem;
+      color: #F5E9DD;
+    }
+
+    .modal-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .modal-body {
+      font-size: 0.85rem;
+      color: rgba(230, 213, 194, 0.9);
+      margin-bottom: 0.9rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .notifications-list {
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .notif-item {
+      padding: 0.45rem 0;
+      border-bottom: 1px solid rgba(226,200,182,0.5);
+    }
+
+    .notif-item:last-child {
+      border-bottom: none;
+    }
+
+    .notif-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #FCEBD4;
+    }
+
+    .notif-meta {
+      font-size: 0.72rem;
+      color: rgba(209, 196, 184, 0.9);
+      margin-bottom: 0.2rem;
+    }
+
+    /* ---------- ASSISTENTE / TOAST ---------- */
+
+    .assistant-toggle {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      z-index: 120;
+      border-radius: 999px;
+      border: 1px solid rgba(226,200,182,0.5);
+      background: #050404;
+      color: #F5E9DD;
+      font-size: 0.8rem;
+      padding: 0.5rem 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 16px 38px rgba(0,0,0,0.9);
+    }
+
+    .assistant-panel {
+      position: fixed;
+      bottom: 3.2rem;
+      left: 1.5rem;
+      width: min(340px, 90vw);
+      background: radial-gradient(circle at top left, rgba(217,160,102,0.16), #050404);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(226,200,182,0.55);
+      box-shadow: 0 26px 70px rgba(0,0,0,0.95);
+      padding: 0.8rem 0.9rem 0.7rem;
+      font-size: 0.8rem;
+      display: none;
+      z-index: 120;
+      color: #F5E9DD;
+    }
+
+    .assistant-panel.active {
+      display: block;
+    }
+
+    .assistant-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .assistant-title {
+      font-weight: 600;
+    }
+
+    .assistant-close {
+      border: none;
+      background: transparent;
+      color: rgba(230,213,194,0.75);
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 0.05rem 0.4rem;
+      border-radius: 999px;
+    }
+
+    .assistant-close:hover {
+      background: rgba(248,231,208,0.08);
+      color: #F5E9DD;
+    }
+
+    .assistant-messages {
+      max-height: 220px;
+      overflow-y: auto;
+      margin-bottom: 0.5rem;
+    }
+
+    .assistant-msg {
+      margin-bottom: 0.35rem;
+      line-height: 1.4;
+    }
+
+    .assistant-msg-user {
+      font-weight: 500;
+      color: #FCEBD4;
+    }
+
+    .assistant-msg-bot {
+      color: rgba(230, 213, 194, 0.9);
+    }
+
+    .assistant-form {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .assistant-form input {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid rgba(226,200,182,0.5);
+      padding: 0.35rem 0.7rem;
+      font-size: 0.8rem;
+      outline: none;
+      background: #050404;
+      color: #F5E9DD;
+    }
+
+    .assistant-form button {
+      border-radius: 999px;
+      border: none;
+      padding: 0.35rem 0.7rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: radial-gradient(circle at top, #D9A066, #8B5E3C);
+      color: #0B0705;
+    }
+
+    .toast {
+      position: fixed;
+      right: 1.5rem;
+      bottom: 1.5rem;
+      background: #050404;
+      color: #F5E9DD;
+      padding: 0.7rem 1rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      box-shadow: 0 20px 52px rgba(0,0,0,0.95);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 130;
+      pointer-events: none;
+      border: 1px solid rgba(226,200,182,0.55);
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .actions-cell {
+      white-space: nowrap;
+    }
+
+    .actions-cell .button-xs {
+      padding-inline: 0.5rem;
+    }
+  
+    @media (max-width: 480px) {
+      .content {
+        padding: 1rem 0.8rem;
+      }
+    }
+
+  </style>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- SheetJS (XLSX) for real .xlsx exports -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-shell">
+    <div class="auth-info">
+      <div class="auth-info-badge">Gestão pessoal de finanças · Portugal</div>
+      <div class="auth-info-title">Management Money</div>
+      <div class="auth-info-subtitle">
+        Uma folha de cálculo avançada em formato aplicação, centrada na tua realidade:
+        datas de salário, limites diários e poupança real mês a mês.
+      </div>
+      <ul class="auth-info-list">
+        <li>• Calcula o teu limite diário com base no próximo salário.</li>
+        <li>• Usa o saldo atual que tens hoje para definir o que ainda podes gastar.</li>
+        <li>• Calendário financeiro com notas diárias de despesas e recebimentos.</li>
+        <li>• Assistente virtual com sugestões de poupança adaptadas aos teus números.</li>
+      </ul>
+      <p class="auth-note">
+        O campo “e-mail” serve apenas como identificador.
+        <strong>Não é necessário usar um e-mail real</strong>, mas certifica-te de que te lembras
+        do que escreves para conseguires voltar à tua conta. A conta fica guardada no teu navegador.
+      </p>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab-button active" data-auth-tab="login">Início de sessão</button>
+        <button type="button" class="auth-tab-button" data-auth-tab="register">Criar conta</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="authLogin" class="auth-panel active">
+        <form id="formLogin">
+          <div class="field">
+            <label for="loginEmail">E-mail (identificador)</label>
+            <input id="loginEmail" type="text" autocomplete="username" required />
+          </div>
+          <div class="field">
+            <label for="loginPassword">Palavra-passe</label>
+            <input id="loginPassword" type="password" autocomplete="current-password" required />
+          </div>
+          <div class="field">
+            <label class="checkbox-inline">
+              <input id="loginRemember" type="checkbox" checked />
+              Manter sessão iniciada neste navegador
+            </label>
+          </div>
+          <div class="field">
+            <button type="submit" class="button button-primary">Entrar</button>
+          </div>
+        </form>        <p class="auth-note">
+          Se ainda não tens conta, usa o separador “Criar conta”. Os dados de cada utilizador
+          (configurações e transações) ficam guardados em separado.
+        </p>
+        <p class="auth-note">
+          <button type="button" id="btnMostrarRecuperar" class="button button-ghost button-xs">
+            Esqueceste-te da palavra-passe?
+          </button>
+        </p>
+        <div id="recuperarBox" style="display:none; margin-top:0.4rem;">
+          <form id="formRecuperar">
+            <div class="field">
+              <label for="recEmail">E-mail (identificador)</label>
+              <input id="recEmail" type="text" required />
+            </div>
+            <div class="field">
+              <label for="recNewPassword">Nova palavra-passe</label>
+              <input id="recNewPassword" type="password" required />
+            </div>
+            <div class="field">
+              <button type="submit" class="button button-outline button-xs">Atualizar palavra-passe</button>
+            </div>
+          </form>
+          <div class="helper">
+            A recuperação é local: não envia e-mails, apenas atualiza a palavra-passe guardada no navegador.
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTO -->
+      <div id="authRegister" class="auth-panel">
+        <form id="formRegister">
+          <div class="field">
+            <label for="regNome">Nome</label>
+            <input id="regNome" type="text" required />
+          </div>
+          <div class="field">
+            <label for="regEmail">E-mail (apenas para esta app)</label>
+            <input id="regEmail" type="text" autocomplete="username" required />
+            <div class="helper">
+              Não precisa de ser um e-mail real; usa algo que consigas memorizar para voltar a entrar.
+            </div>
+          </div>
+          <div class="field">
+            <label for="regPassword">Palavra-passe</label>
+            <input id="regPassword" type="password" autocomplete="new-password" required />
+          </div>
+          <div class="field">
+            <label for="regSalarioValor">Salário líquido mensal típico (€)</label>
+            <input id="regSalarioValor" type="number" step="0.01" min="0" placeholder="Ex: 1100" required />
+            <div class="helper">
+              Este valor é usado nas métricas de poupança mensal e para preencher o mês por defeito.
+            </div>
+          </div>
+          <div class="field">
+            <label for="regSalarioDia">Dia habitual de recebimento do salário (1–31)</label>
+            <input id="regSalarioDia" type="number" min="1" max="31" placeholder="Ex: 28" required />
+            <div class="helper">
+              O limite diário é calculado a contar até ao próximo salário, com base neste dia.
+            </div>
+          </div>
+          <div class="field">
+            <label class="checkbox-inline">
+              <input id="regRememberLogin" type="checkbox" checked />
+              Guardar dados de início de sessão neste navegador
+            </label>
+            <div class="helper">
+              Se desmarcares, não ficas com a sessão guardada automaticamente neste dispositivo.
+            </div>
+          </div>
+          <div class="field">
+            <button type="submit" class="button button-primary">Criar conta e entrar</button>
+          </div>
+        </form>      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAÇÃO -->
+<div id="appModal" class="modal-overlay" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div id="modalTitle" class="modal-title"></div>
+    <div id="modalMessage" class="modal-body"></div>
+    <div class="modal-actions">
+      <button type="button" class="button button-outline button-xs" id="modalCancel">Cancelar</button>
+      <button type="button" class="button button-primary button-xs" id="modalConfirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOTIFICAÇÕES -->
+<div id="notificationsOverlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal-card" style="max-width:520px;" role="dialog" aria-modal="true">
+    <div class="modal-title">Notificações financeiras</div>
+    <div class="modal-body">
+      <div id="notificationsList" class="notifications-list"></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="button button-outline button-xs" id="btnFecharNotificacoes">Fechar</button>
+      <button type="button" class="button button-ghost button-xs" id="btnLimparNotificacoes">Limpar tudo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR TRANSAÇÃO -->
+<div id="editTransOverlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-title">Editar transação</div>
+    <form id="formEditarTransacao">
+      <input type="hidden" id="editTransId" />
+      <div class="field">
+        <label for="editTipoTransacao">Tipo</label>
+        <select id="editTipoTransacao">
+          <option value="DESPESA">Despesa</option>
+          <option value="RECEITA_EXTRA">Recebimento extra</option>
+        </select>
+      </div>
+      <div class="field date-field">
+        <label for="editDataTransacao">Data</label>
+        <input type="date" id="editDataTransacao" />
+      </div>
+      <div class="field">
+        <label for="editCategoriaTransacao">Categoria</label>
+        <input type="text" id="editCategoriaTransacao" />
+      </div>
+      <div class="field">
+        <label for="editValorTransacao">Valor (€)</label>
+        <input type="number" id="editValorTransacao" step="0.01" min="0" />
+      </div>
+      <div class="field">
+        <label for="editDescricaoTransacao">Descrição</label>
+        <input type="text" id="editDescricaoTransacao" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="button button-outline button-xs" id="btnCancelarEditarTrans">Cancelar</button>
+        <button type="submit" class="button button-primary button-xs">Guardar alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- APP PRINCIPAL -->
+<div class="app-shell" id="appShell" style="display:none;">
+  <header class="topbar">
+    <div class="brand">
+      <div>
+        <div class="brand-text-main">Management Money</div>
+        <div class="brand-text-sub">Gestor de poupança e limites diários</div>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Navegação principal">
+      <button class="nav-button active" data-section-target="dashboard">
+        <span class="dot"></span> Dashboard
+      </button>
+      <button class="nav-button" data-section-target="calendar">
+        <span class="dot"></span> Calendário
+      </button>
+      <button class="nav-button" data-section-target="transactions">
+        <span class="dot"></span> Transações
+      </button>
+      <button class="nav-button" data-section-target="reports">
+        <span class="dot"></span> Relatórios
+      </button>
+      <button class="nav-button" data-section-target="smart">
+        <span class="dot"></span> Gestor inteligente
+      </button>
+      <button class="nav-button" data-section-target="export">
+        <span class="dot"></span> Exportar
+      </button>
+    </nav>
+
+    <div class="nav-right">
+      <div class="pill">
+        Portugal
+        <span class="pill-badge">EUR · pt-PT</span>
+      </div>
+      <div class="date-chip" id="todayChip"></div>
+      <div class="user-chip" id="userChip"></div>
+      <button type="button" class="button button-outline button-xs" id="btnNotifications">
+        Notificações <span id="notifBadge" class="pill-badge" style="display:none;">0</span>
+      </button>
+      <button type="button" class="button button-outline button-xs" id="btnLogout">Terminar sessão</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- NAVBAR SOMA DE POUPANÇA -->
+    <section class="savings-nav" aria-label="Soma de poupança">
+      <div>
+        <div class="savings-title">Soma de poupança</div>
+        <div class="savings-subtitle">
+          Vê num só lugar quanto estás a poupar por dia, mês ou ano, com base nos teus dados reais.
+        </div>
+      </div>
+      <div class="savings-controls">
+        <button type="button" class="savings-tab" data-view="DIA">Dia</button>
+        <button type="button" class="savings-tab active" data-view="MES">Mês</button>
+        <button type="button" class="savings-tab" data-view="ANO">Ano</button>
+      </div>
+      <div class="savings-main">
+        <div id="savingsValue" class="savings-value">€ 0,00</div>
+        <div id="savingsCaption" class="savings-caption">
+          Poupança líquida do mês (salário + extras − despesas).
+        </div>
+      </div>
+    </section>
+
+    <header class="page-header">
+      <div>
+        <div class="page-title">Resumo da tua poupança</div>
+        <p class="page-subtitle">
+          O Management Money usa o dia do teu salário e o saldo que tens hoje para calcular
+          limites diários, poupança mensal real e projeções até ao próximo pagamento.
+        </p>
+      </div>
+      <div class="month-selector">
+        <label for="mesReferencia">Período de análise</label>
+        <input type="month" id="mesReferencia" />
+      </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section id="section-dashboard" class="section active">
+      <div class="grid">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Configuração do mês</div>
+              <div class="card-subtitle">
+                Valores em euros para o mês selecionado, a partir do teu salário típico.
+              </div>
+            </div>
+            <span class="badge">Planeamento mensal</span>
+          </div>
+
+          <form id="formConfigMes">
+            <div class="form-grid">
+              <div class="field">
+                <label for="saldoInicial">Saldo atual afeto a este mês (opcional)</label>
+                <input type="number" id="saldoInicial" min="0" step="0.01" placeholder="Ex: 100.00" />
+                <div class="helper">
+                  Quanto tens hoje disponível em contas/cartão que queres dedicar a este mês.
+                  Se preencheres este campo, o limite diário passa a ser calculado a partir deste saldo
+                  (menos despesas + extras).
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="rendimentoMensal">Rendimento líquido do mês (€)</label>
+                <input type="number" id="rendimentoMensal" min="0" step="0.01" placeholder="Ex: 1100.00" />
+                <div class="helper">
+                  Usado para métricas de poupança mensal (taxa de poupança e comparação com o objetivo).
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="objetivoPoupanca">Objetivo de poupança do mês (€)</label>
+                <input type="number" id="objetivoPoupanca" min="0" step="0.01" placeholder="Ex: 220.00" />
+                <div class="helper">
+                  Referência inspirada na regra 50/30/20: muitos guias sugerem cerca de
+                  <strong>20% do rendimento líquido</strong> para poupança.
+                </div>
+              </div>
+
+              <div class="field">
+                <label>&nbsp;</label>
+                <div class="field-row">
+                  <button type="submit" class="button button-primary">Guardar mês e recalcular</button>
+                  <button type="button" class="button button-ghost" id="btnReporValores">Repor valores deste mês</button>
+                </div>
+                <div class="helper">
+                  Os valores ficam guardados por mês e por utilizador (localStorage).
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <div class="info-line">
+            O limite diário é calculado como
+            <strong>montante disponível para gastar ÷ dias até ao próximo salário</strong>,
+            usando o dia de hoje como referência.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Resumo do mês e do dia</div>
+              <div class="card-subtitle">
+                Visão diária (hoje ou dia selecionado) e visão mensal, com base nas tuas transações.
+              </div>
+            </div>
+          </div>
+
+          <!-- RESUMO DIÁRIO -->
+          <div class="summary-grid-daily">
+            <div class="summary-card">
+              <div class="summary-label">Despesas do dia</div>
+              <div id="resumoGastoHoje" class="summary-value negative">€ 0,00</div>
+              <div class="summary-tag">Total de saídas registadas no dia em análise.</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Entradas do dia</div>
+              <div id="resumoRecebHoje" class="summary-value positive">€ 0,00</div>
+              <div class="summary-tag">
+                Recebimentos extra do dia (e salário, se for o dia de pagamento).
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Saldo do dia</div>
+              <div id="resumoSaldoDia" class="summary-value">€ 0,00</div>
+              <div class="summary-tag">
+                Entradas do dia menos despesas do dia.
+              </div>
+            </div>
+          </div>
+
+          <div class="info-line" id="infoResumoDiario">
+            Dia em análise: sem seleção. Usa o calendário para escolher um dia ou mantém o dia de hoje.
+          </div>
+
+          <!-- RESUMO MENSAL -->
+          <div class="summary-grid" style="margin-top: 0.8rem;">
+            <div class="summary-card">
+              <div class="summary-label">Total disponível para gastos</div>
+              <div id="resumoDisponivel" class="summary-value">€ 0,00</div>
+              <div class="summary-tag">
+                Se definires um saldo atual, usamos <strong>saldo atual - despesas + extras</strong>.
+                Se não definires, usamos <strong>salário + extras - objetivo de poupança - despesas</strong>.
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Limite diário até ao próximo salário</div>
+              <div id="resumoLimiteDiario" class="summary-value">€ 0,00</div>
+              <div class="summary-tag">Montante disponível distribuído pelos dias até ao próximo salário.</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Poupança mensal estimada</div>
+              <div id="resumoPoupancaEstimada" class="summary-value positive">€ 0,00</div>
+              <div class="summary-tag">
+                Salário do mês + extras - despesas, com base no ritmo atual.
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Total de despesas do mês</div>
+              <div id="resumoDespesas" class="summary-value negative">€ 0,00</div>
+              <div class="summary-tag">Soma de todas as saídas registadas.</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Recebimentos extra</div>
+              <div id="resumoReceitasExtra" class="summary-value positive">€ 0,00</div>
+              <div class="summary-tag">Entradas além do salário base.</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Taxa de poupança real</div>
+              <div id="resumoTaxaPoupanca" class="summary-value">0%</div>
+              <div class="summary-tag">
+                Poupança mensal real / salário do mês.
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Poupado até agora</div>
+              <div id="resumoPoupadoAteAgora" class="summary-value positive">€ 0,00</div>
+              <div class="summary-tag">
+                Soma da poupança real dos <strong>meses anteriores</strong>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALENDÁRIO -->
+    <section id="section-calendar" class="section">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Calendário financeiro</div>
+            <div class="card-subtitle">
+              Grelha mensal com destaque para o dia do salário e resumo diário de despesas/receitas.
+              Clica num dia para ver os movimentos detalhados e atualizar o resumo diário.
+            </div>
+          </div>
+          <span class="badge">Visão diária</span>
+        </div>
+
+        <div class="calendar-layout">
+          <div class="calendar-shell">
+            <div class="calendar-header-text">
+              <span>Mês em análise</span>
+              <span id="calendarLegend"></span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+              <!-- preenchido por JavaScript -->
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="padding: 0.75rem 0.85rem;">
+              <div class="card-header" style="margin-bottom: 0.6rem;">
+                <div>
+                  <div class="card-title">Movimentos no dia selecionado</div>
+                  <div class="card-subtitle" id="calendarSelectedLabel">
+                    Sem dia selecionado – a tabela mostra o mês completo.
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Tipo</th>
+                      <th>Categoria</th>
+                      <th>Descrição</th>
+                      <th>Valor</th>
+                      <th style="width: 90px;">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyCalendario"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSAÇÕES -->
+    <section id="section-transactions" class="section">
+      <div class="grid">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Nova transação</div>
+              <div class="card-subtitle">Despesa ou recebimento extra, associado ao mês da data.</div>
+            </div>
+            <span class="badge">Entrada rápida</span>
+          </div>
+
+          <form id="formTransacao">
+            <div class="form-grid">
+              <div class="field">
+                <label for="tipoTransacao">Tipo</label>
+                <select id="tipoTransacao">
+                  <option value="DESPESA">Despesa</option>
+                  <option value="RECEITA_EXTRA">Recebimento extra</option>
+                </select>
+              </div>
+
+              <div class="field date-field">
+                <label for="dataTransacao">Data</label>
+                <input type="date" id="dataTransacao" />
+              </div>
+
+              <div class="field">
+                <label for="categoriaTransacao">Categoria</label>
+                <input type="text" id="categoriaTransacao" placeholder="Ex: Alimentação, Renda, Lazer" />
+              </div>
+
+              <div class="field">
+                <label for="valorTransacao">Valor (€)</label>
+                <input type="number" id="valorTransacao" step="0.01" min="0" />
+              </div>
+
+              <div class="field" style="grid-column: 1 / -1;">
+                <label for="descricaoTransacao">Descrição (opcional)</label>
+                <input id="descricaoTransacao" type="text" placeholder="Ex: Jantar fora, combustível, bónus, venda de artigo." />
+              </div>
+
+              <div class="field">
+                <label>&nbsp;</label>
+                <button type="submit" class="button button-primary">Adicionar transação</button>
+              </div>
+
+              <div class="field">
+                <label>&nbsp;</label>
+                <button type="button" class="button button-ghost" id="btnLimparTransacoesMes">
+                  Limpar transações do mês
+                </button>
+              </div>
+            </div>
+          </form>
+
+          
+          <div class="card-subsection" style="margin-top: 0.9rem; border-top: 1px solid rgba(226,200,182,0.4); padding-top: 0.8rem;">
+            <div class="card-subsection-title" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(230,213,194,0.9); margin-bottom: 0.3rem;">
+              Importar documentos
+            </div>
+            <div class="card-subsection-text" style="font-size: 0.8rem; color: rgba(230,213,194,0.8); margin-bottom: 0.4rem;">
+              Anexa extratos ou ficheiros com as tuas despesas/receitas e deixa o Management Money fazer o resto.
+              Para melhor leitura automática, usa o template pronto para telemóvel.
+            </div>
+            <div class="field">
+              <label for="transUpload">Ficheiros (PDF, Word, Excel, TXT, CSV)</label>
+              <input
+                id="transUpload"
+                type="file"
+                multiple
+                accept=".txt,.csv,.pdf,.xls,.xlsx,.doc,.docx"
+              />
+              <div class="helper">
+                A leitura inteligente é otimizada para o template em texto/CSV. Outros formatos ficam registados,
+                mas podem não ser lidos automaticamente.
+              </div>
+            </div>
+            <div class="field-row" style="margin-top: 0.4rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <button
+                type="button"
+                class="button button-primary button-xs"
+                id="btnImportarTransacoes"
+              >
+                Ler ficheiros e adicionar transações
+              </button>
+              <button
+                type="button"
+                class="button button-ghost button-xs"
+                id="btnDownloadTemplateTransacoes"
+              >
+                Descarregar template para telemóvel
+              </button>
+            </div>
+          </div>
+<div class="info-line">
+            Cada transação é associada automaticamente ao mês de referência com base na data.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Transações do mês</div>
+              <div class="card-subtitle">Resumo rápido do que entrou e saiu.</div>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Categoria</th>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th style="width: 90px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyTransacoes"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RELATÓRIOS -->
+    <section id="section-reports" class="section">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Relatórios e gráficos</div>
+            <div class="card-subtitle">
+              Distribuição de despesas por categoria e evolução da poupança, com visão por dia, mês, ano ou todos os anos.
+            </div>
+          </div>
+          <span class="badge">Análise visual</span>
+        </div>
+
+        <div class="field-row" style="margin-bottom: 0.8rem;">
+          <div class="field" style="margin-bottom: 0;">
+            <label for="visaoRelatorios" style="font-size: 0.75rem; color: rgba(230,213,194,0.9);">
+              Visão dos relatórios
+            </label>
+            <select id="visaoRelatorios">
+              <option value="DIA" selected>Dia (dia selecionado/hoje)</option>
+              <option value="MES">Mês de referência</option>
+              <option value="ANO">Ano do mês de referência</option>
+              <option value="TODOS">Todos os anos</option>
+            </select>
+          </div>
+          <div class="helper">
+            Usa o calendário para escolher um dia específico. Os gráficos ajustam-se à visão escolhida.
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <span>Despesas por categoria</span>
+              <span class="chart-caption">Gráfico circular com o peso de cada categoria no período selecionado.</span>
+            </div>
+            <canvas id="graficoDespesasCategoria"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <span id="tituloGraficoDireito">Poupança acumulada</span>
+              <span class="chart-caption" id="captionGraficoDireito">
+                Saldo de poupança acumulada ao longo do tempo no período selecionado.
+              </span>
+            </div>
+            <canvas id="graficoPoupancaDia"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GESTOR INTELIGENTE -->
+    <section id="section-smart" class="section">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Gestor inteligente</div>
+            <div class="card-subtitle">
+              Compara dois períodos (dia, mês ou ano) e recebe um relatório automático com diferenças,
+              alertas e sugestões de melhoria.
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <form id="formSmartComparacao" class="grid" style="margin-bottom: 0.9rem; gap: 0.9rem;">
+            <div class="field">
+              <label for="smartTipo">Tipo de comparação</label>
+              <select id="smartTipo">
+                <option value="DIA">Dia</option>
+                <option value="MES" selected>Mês</option>
+                <option value="ANO">Ano</option>
+              </select>
+            </div>
+            <div class="field"></div>
+
+            <div class="field date-field">
+              <label>Período A</label>
+              <input id="smartPeriodoA" type="month" />
+              <small class="helper" id="smartHintA">Escolhe o mês de referência para o período A.</small>
+            </div>
+            <div class="field date-field">
+              <label>Período B</label>
+              <input id="smartPeriodoB" type="month" />
+              <small class="helper" id="smartHintB">Escolhe o mês para comparar com o período A.</small>
+            </div>
+
+            <div class="field">
+              <button type="submit" class="button button-primary">Gerar comparação</button>
+            </div>
+            <div class="field" style="text-align:right;">
+              <button type="button" id="btnSmartExcel" class="button button-ghost button-xs" disabled>Exportar comparação para Excel</button>
+              <button type="button" id="btnSmartPDF" class="button button-ghost button-xs" disabled>Exportar comparação para PDF</button>
+            </div>
+          </form>
+          <div class="card-subsection" style="margin-bottom: 1rem; border-top: 1px solid rgba(226,200,182,0.4); padding-top: 0.8rem;">
+            <div class="card-subsection-title" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(230,213,194,0.9); margin-bottom: 0.3rem;">
+              Documentos para comparações
+            </div>
+            <div class="card-subsection-text" style="font-size: 0.8rem; color: rgba(230,213,194,0.8); margin-bottom: 0.4rem;">
+              Podes reutilizar o mesmo template de transações para carregar períodos inteiros e depois comparar
+              mês, ano ou dias aqui no Gestor inteligente.
+            </div>
+            <div class="field">
+              <label for="smartUpload">Ficheiros (PDF, Word, Excel, TXT, CSV)</label>
+              <input
+                id="smartUpload"
+                type="file"
+                multiple
+                accept=".txt,.csv,.pdf,.xls,.xlsx,.doc,.docx"
+              />
+              <div class="helper">
+                Sempre que importas, as transações são adicionadas à tua sessão e ficam disponíveis para todas
+                as análises e comparações.
+              </div>
+            </div>
+            <div class="field-row" style="margin-top: 0.4rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <button
+                type="button"
+                class="button button-primary button-xs"
+                id="btnSmartImportar"
+              >
+                Ler ficheiros e atualizar comparação
+              </button>
+              <button
+                type="button"
+                class="button button-ghost button-xs"
+                id="btnSmartTemplate"
+              >
+                Descarregar template de comparação
+              </button>
+            </div>
+          </div>
+
+
+          <div class="grid" style="gap: 0.9rem;">
+            <div class="report-preview" id="smartResumoA">
+              <h4>Período A</h4>
+              <p>Aqui vais ver um resumo do período A depois de gerares a comparação.</p>
+            </div>
+            <div class="report-preview" id="smartResumoB">
+              <h4>Período B</h4>
+              <p>Aqui vais ver um resumo do período B depois de gerares a comparação.</p>
+            </div>
+          </div>
+
+          <div class="report-preview" id="smartInsights" style="margin-top: 0.9rem;">
+            <strong>Insights inteligentes:</strong>
+            <p>Depois de gerares uma comparação, vou analisar as diferenças de gastos, poupança e categorias
+            para te dar feedback concreto sobre o que está melhor, o que piorou e onde podes atuar.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPORTAR -->
+    <section id="section-export" class="section">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Exportar dados</div>
+            <div class="card-subtitle">
+              Exporta as transações e o resumo para Excel (.xls) ou PDF para cada período.
+            </div>
+          </div>
+          <span class="badge">Relatórios externos</span>
+        </div>
+
+        <div class="export-grid">
+          <div>
+            <div class="field">
+              <label for="periodoExportacao">Período</label>
+              <select id="periodoExportacao">
+                <option value="DIA_ATUAL">Dia atual/selecionado</option>
+                <option value="MES_ATUAL">Mês de referência atual</option>
+                <option value="ANO_ATUAL">Ano do mês de referência</option>
+                <option value="TODOS">Todos os dados</option>
+              </select>
+            </div>
+
+            <div class="field-row" style="margin-top: 0.6rem;">
+              <button type="button" class="button button-outline" id="btnExportarExcel">
+                Exportar para Excel (.xls)
+              </button>
+              <button type="button" class="button button-primary" id="btnExportarPDF">
+                Exportar relatório em PDF
+              </button>
+            </div>
+
+            <div class="info-line">
+              O Excel é gerado com tabela formatada simples, com fundo branco, apenas com o nome "Management Money".
+            </div>
+          </div>
+
+          <div>
+            <div class="export-note">
+              <p>
+                O Management Money aproxima-se da lógica utilizada em orçamentos profissionais:
+                limites diários baseados na data do próximo salário, controlo de entradas e saídas
+                por categoria e acompanhamento da poupança real do mês.
+              </p>
+              <p>
+                Combina facilmente com abordagens como a
+                <span class="badge-soft">regra 50/30/20</span>
+                (necessidades / desejos / poupança), ajustando os valores de
+                rendimento e objetivo de poupança às tuas necessidades.
+              </p>
+              <p>
+                Todos os dados são guardados apenas no teu navegador, por utilizador, sem envio para servidores.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ASSISTENTE VIRTUAL -->
+<button
+  id="assistantToggle"
+  class="assistant-toggle"
+  style="display:none;"
+>
+  Assistente Management
+</button>
+<div id="assistantPanel" class="assistant-panel">
+  <div class="assistant-header">
+    <div class="assistant-title">Assistente de poupança</div>
+    <button
+      type="button"
+      id="assistantClose"
+      class="assistant-close"
+      aria-label="Fechar assistente"
+    >
+      ×
+    </button>
+  </div>
+  <div id="assistantMessages" class="assistant-messages"></div>
+  <form id="assistantForm" class="assistant-form">
+    <input
+      type="text"
+      id="assistantInput"
+      placeholder="Faz uma pergunta (poupança, limite diário, despesas...)"
+    />
+    <button type="submit">Enviar</button>
+  </form>
+</div>
+
+<script>
+  const STORAGE_KEY = "managementMoney_root_v4";
+
+  let rootState = {
+    users: [],
+    sessions: {},
+    currentUserId: null
+  };
+
+  let selectedCalendarDate = null;
+  let modalCallbackConfirm = null;
+  let chartDespesasCategoria = null;
+  let chartPoupanca = null;
+  let ultimaComparacaoSmart = null;
+  let transacaoEmEdicaoId = null;
+  let savingsView = "MES";
+
+  // -------------------- UTIL --------------------
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        rootState = Object.assign(rootState, parsed);
+      }
+    } catch (e) {
+      console.warn("Erro a carregar estado:", e);
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rootState));
+    } catch (e) {
+      console.warn("Erro a guardar estado:", e);
+    }
+  }
+
+  function gerarId() {
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+  }
+
+  function obterMesAtualISO() {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    return ano + "-" + mes;
+  }
+
+  function formatarMoeda(v) {
+    if (!isFinite(v)) v = 0;
+    return v.toLocaleString("pt-PT", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  function formatarPercentagem(v) {
+    if (!isFinite(v)) v = 0;
+    return v.toLocaleString("pt-PT", {
+      style: "percent",
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    });
+  }
+
+  function formatarDataCurta(dataISO) {
+    const d = new Date(dataISO);
+    if (Number.isNaN(d.getTime())) return dataISO;
+    return new Intl.DateTimeFormat("pt-PT", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }).format(d);
+  }
+
+  function getCurrentUser() {
+    if (!rootState.currentUserId) return null;
+    return rootState.users.find(u => u.id === rootState.currentUserId) || null;
+  }
+
+  function getSession() {
+    const uid = rootState.currentUserId;
+    if (!uid) return null;
+    if (!rootState.sessions[uid]) {
+      rootState.sessions[uid] = {
+        mesAtivo: obterMesAtualISO(),
+        meses: {},
+        transacoes: [],
+        notifications: [],
+        smartComparacoes: []
+      };
+    } else {
+      if (!rootState.sessions[uid].notifications) {
+        rootState.sessions[uid].notifications = [];
+      }
+      if (!rootState.sessions[uid].smartComparacoes) {
+        rootState.sessions[uid].smartComparacoes = [];
+      }
+    }
+    return rootState.sessions[uid];
+  }
+
+  function obterMesAtivo() {
+    const s = getSession();
+    if (!s) return obterMesAtualISO();
+    if (!s.mesAtivo) s.mesAtivo = obterMesAtualISO();
+    return s.mesAtivo;
+  }
+
+  function setMesAtivo(mes) {
+    const s = getSession();
+    if (!s) return;
+    s.mesAtivo = mes;
+    saveState();
+  }
+
+  // Configuração por mês
+  function obterConfigMes(mesRef) {
+    const session = getSession();
+    if (!session) return null;
+    if (!session.meses[mesRef]) {
+      const user = getCurrentUser();
+      const sal = user?.salaryDefault || 0;
+      session.meses[mesRef] = {
+        saldoInicial: 0,
+        rendimentoMensal: sal,
+        objetivoPoupanca: sal ? sal * 0.2 : 0
+      };
+    }
+    return session.meses[mesRef];
+  }
+
+  function obterTransacoesMes(mesRef) {
+    const session = getSession();
+    if (!session) return [];
+    return session.transacoes.filter(t => t.mesRef === mesRef);
+  }
+
+  function obterInfoDiasMes(mesRef) {
+    const [anoStr, mesStr] = mesRef.split("-");
+    const ano = parseInt(anoStr, 10);
+    const mesIndex = parseInt(mesStr, 10) - 1;
+    const primeiroDia = new Date(ano, mesIndex, 1);
+    const ultimoDia = new Date(ano, mesIndex + 1, 0);
+    const totalDias = ultimoDia.getDate();
+
+    const hoje = new Date();
+    const mesmoMesAtual = hoje.getFullYear() === ano && hoje.getMonth() === mesIndex;
+    let diasRestantes;
+    if (mesmoMesAtual) {
+      const diaHoje = hoje.getDate();
+      diasRestantes = Math.max(1, totalDias - diaHoje + 1);
+    } else {
+      diasRestantes = totalDias;
+    }
+
+    return { totalDias, diasRestantes, primeiroDia, ultimoDia, mesmoMesAtual };
+  }
+
+  function obterDiasRestantesParaSalario(mesRef) {
+    const user = getCurrentUser();
+    const salaryDay = user?.salaryDay || 1;
+
+    const hoje = new Date();
+    const [anoStr, mesStr] = mesRef.split("-");
+    const ano = parseInt(anoStr, 10);
+    const mesIndex = parseInt(mesStr, 10) - 1;
+
+    if (hoje.getFullYear() !== ano || hoje.getMonth() !== mesIndex) {
+      const info = obterInfoDiasMes(mesRef);
+      return info.diasRestantes;
+    }
+
+    const diaHoje = hoje.getDate();
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const todayDate = new Date(ano, mesIndex, diaHoje);
+
+    let nextYear = ano;
+    let nextMonth = mesIndex;
+
+    if (diaHoje > salaryDay) {
+      if (mesIndex === 11) {
+        nextYear = ano + 1;
+        nextMonth = 0;
+      } else {
+        nextMonth = mesIndex + 1;
+      }
+    }
+
+    const lastDayNextMonth = new Date(nextYear, nextMonth + 1, 0).getDate();
+    const diaSalarioEfetivo = Math.min(salaryDay, lastDayNextMonth);
+    const nextSalaryDate = new Date(nextYear, nextMonth, diaSalarioEfetivo);
+
+    const diff = Math.floor((nextSalaryDate - todayDate) / msPerDay) + 1;
+    return diff < 1 ? 1 : diff;
+  }
+
+  function calcularResumoMes(mesRef) {
+    const cfg = obterConfigMes(mesRef);
+    const lista = obterTransacoesMes(mesRef);
+
+    let totalDespesas = 0;
+    let totalReceitasExtra = 0;
+
+    for (const t of lista) {
+      if (t.tipo === "DESPESA") totalDespesas += t.valor;
+      if (t.tipo === "RECEITA_EXTRA") totalReceitasExtra += t.valor;
+    }
+
+    const saldoInicial = Number(cfg.saldoInicial) || 0;
+    const salarioMes = Number(cfg.rendimentoMensal) || 0;
+    const objetivo = Number(cfg.objetivoPoupanca) || 0;
+
+    // entradas ligadas ao mês (salário + extras)
+    const entradasSemSaldo = salarioMes + totalReceitasExtra;
+
+    // tudo o que tens neste ciclo até ao próximo salário
+    const entradasTotais = saldoInicial + entradasSemSaldo;
+
+    // quanto ainda podes gastar até ao próximo salário
+    let disponivelParaGastar = entradasTotais - objetivo - totalDespesas;
+
+    // dias até ao próximo salário
+    const diasRestantes = obterDiasRestantesParaSalario(mesRef);
+    const limiteDiario = diasRestantes > 0
+      ? Math.max(0, disponivelParaGastar) / diasRestantes
+      : 0;
+
+    // poupança real deste mês (sem contar saldo inicial)
+    const poupancaMensalReal = Math.max(0, entradasSemSaldo - totalDespesas);
+    const taxaPoupanca = salarioMes > 0 ? poupancaMensalReal / salarioMes : 0;
+
+    const poupancaEstimada = poupancaMensalReal;
+
+    return {
+      totalDespesas,
+      totalReceitasExtra,
+      saldoInicial,
+      salarioMes,
+      objetivo,
+      disponivelParaGastar,
+      limiteDiario,
+      poupancaMensalReal,
+      taxaPoupanca,
+      poupancaEstimada
+    };
+  }
+
+  function calcularResumoDia(mesRef, dataISOParam) {
+    const session = getSession();
+    const user = getCurrentUser();
+    if (!session || !user) return null;
+
+    let dataISO = dataISOParam;
+    const hoje = new Date();
+    const hojeISO = hoje.toISOString().slice(0, 10);
+    const mesAtual = hojeISO.slice(0, 7);
+
+    if (!dataISO) {
+      dataISO = mesRef === mesAtual ? hojeISO : mesRef + "-01";
+    }
+
+    const transacoesDia = session.transacoes.filter(t => t.dataISO === dataISO);
+
+    let despesasHoje = 0;
+    let extrasHoje = 0;
+
+    for (const t of transacoesDia) {
+      if (t.tipo === "DESPESA") despesasHoje += t.valor;
+      if (t.tipo === "RECEITA_EXTRA") extrasHoje += t.valor;
+    }
+
+    const dia = parseInt(dataISO.slice(8, 10), 10);
+    let salarioHoje = 0;
+    if (dataISO.slice(0, 7) === mesRef && dia === user.salaryDay) {
+      const cfg = obterConfigMes(mesRef);
+      salarioHoje = Number(cfg.rendimentoMensal) || 0;
+    }
+
+    const entradasDia = extrasHoje + salarioHoje;
+    const saldoDia = entradasDia - despesasHoje;
+
+    const resumoMes = calcularResumoMes(mesRef);
+    return {
+      dataISO,
+      despesasHoje,
+      extrasHoje,
+      salarioHoje,
+      saldoDia,
+      limiteDiario: resumoMes.limiteDiario
+    };
+  }
+
+  function calcularTotalPoupadoAteAgora() {
+    const session = getSession();
+    if (!session) return 0;
+    const mesAtual = obterMesAtualISO();
+    let total = 0;
+    for (const mesKey of Object.keys(session.meses || {})) {
+      if (mesKey < mesAtual) {
+        const r = calcularResumoMes(mesKey);
+        total += r.poupancaMensalReal || 0;
+      }
+    }
+    return total;
+  }
+
+  // -------------------- MODAL E TOAST --------------------
+  function abrirModalConfirm(titulo, mensagem, onConfirm) {
+    const overlay = document.getElementById("appModal");
+    document.getElementById("modalTitle").textContent = titulo;
+    document.getElementById("modalMessage").textContent = mensagem;
+    overlay.classList.add("active");
+    modalCallbackConfirm = typeof onConfirm === "function" ? onConfirm : null;
+  }
+
+  function fecharModal() {
+    const overlay = document.getElementById("appModal");
+    overlay.classList.remove("active");
+    modalCallbackConfirm = null;
+  }
+
+  function mostrarToast(msg) {
+    const t = document.getElementById("toast");
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add("visible");
+    setTimeout(() => t.classList.remove("visible"), 4200);
+  }
+
+  // -------------------- NOTIFICAÇÕES --------------------
+  function atualizarBadgeNotificacoes() {
+    const session = getSession();
+    const badge = document.getElementById("notifBadge");
+    if (!session || !badge) return;
+    const naoLidas = (session.notifications || []).filter(n => !n.lida).length;
+    if (naoLidas > 0) {
+      badge.style.display = "inline-flex";
+      badge.textContent = naoLidas;
+    } else {
+      badge.style.display = "none";
+    }
+  }
+
+  function registarNotificacaoLimite(resumoDia) {
+    const session = getSession();
+    if (!session) return;
+    if (resumoDia.despesasHoje <= resumoDia.limiteDiario || resumoDia.limiteDiario <= 0) return;
+
+    const dia = resumoDia.dataISO;
+    if (session.notifications.some(n => n.tipo === "LIMITE_DIARIO" && n.dia === dia)) return;
+
+    const msg = `No dia ${formatarDataCurta(dia)} gastaste ${formatarMoeda(
+      resumoDia.despesasHoje
+    )}, acima do limite diário de ${formatarMoeda(resumoDia.limiteDiario)}.`;
+
+    session.notifications.unshift({
+      id: gerarId(),
+      tipo: "LIMITE_DIARIO",
+      dia,
+      mensagem: msg,
+      dataCriacao: new Date().toISOString(),
+      lida: false
+    });
+
+    if (session.notifications.length > 80) session.notifications.pop();
+    saveState();
+    atualizarBadgeNotificacoes();
+    mostrarToast("Gastaste acima do limite diário. Vê as notificações.");
+  }
+
+  function abrirNotificacoes() {
+    const overlay = document.getElementById("notificationsOverlay");
+    const listaEl = document.getElementById("notificationsList");
+    const session = getSession();
+    listaEl.innerHTML = "";
+    const lista = (session?.notifications || []).slice().sort((a, b) =>
+      (b.dataCriacao || "").localeCompare(a.dataCriacao || "")
+    );
+    if (!lista.length) {
+      listaEl.innerHTML = "<p class='helper'>Ainda não tens notificações.</p>";
+    } else {
+      for (const n of lista) {
+        const div = document.createElement("div");
+        div.className = "notif-item";
+        div.innerHTML = `
+          <div class="notif-title">${n.tipo === "LIMITE_DIARIO" ? "Limite diário ultrapassado" : "Aviso"}</div>
+          <div class="notif-meta">${formatarDataCurta(n.dia)} · ${new Date(
+          n.dataCriacao
+        ).toLocaleString("pt-PT")}</div>
+          <div>${n.mensagem}</div>
+        `;
+        listaEl.appendChild(div);
+      }
+    }
+    (session?.notifications || []).forEach(n => (n.lida = true));
+    saveState();
+    atualizarBadgeNotificacoes();
+    overlay.classList.add("active");
+  }
+
+  function fecharNotificacoes() {
+    document.getElementById("notificationsOverlay").classList.remove("active");
+  }
+
+  function limparNotificacoes() {
+    const session = getSession();
+    if (!session) return;
+    session.notifications = [];
+    saveState();
+    abrirNotificacoes();
+  }
+
+  // -------------------- AUTH --------------------
+  function trocarTabAuth(tab) {
+    document.querySelectorAll(".auth-tab-button").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.authTab === tab);
+    });
+    document.querySelectorAll(".auth-panel").forEach(panel => {
+      panel.classList.toggle(
+        "active",
+        (panel.id === "authLogin" && tab === "login") ||
+          (panel.id === "authRegister" && tab === "register")
+      );
+    });
+  }
+
+  function handleRegister(e) {
+    e.preventDefault();
+    const nome = document.getElementById("regNome").value.trim();
+    const email = document.getElementById("regEmail").value.trim().toLowerCase();
+    const password = document.getElementById("regPassword").value.trim();
+    const salValor = parseFloat(document.getElementById("regSalarioValor").value) || 0;
+    const salDia = parseInt(document.getElementById("regSalarioDia").value, 10);
+    const regRememberEl = document.getElementById("regRememberLogin");
+    const rememberLogin = regRememberEl ? regRememberEl.checked : true;
+
+    if (!nome || !email || !password || !salValor || !salDia) {
+      mostrarToast("Preenche todos os campos de registo.");
+      return;
+    }
+
+    if (rootState.users.some(u => u.email === email)) {
+      mostrarToast("Já existe uma conta com esse identificador.");
+      return;
+    }
+
+    const id = gerarId();
+    rootState.users.push({
+      id,
+      nome,
+      email,
+      password,
+      salaryDefault: salValor,
+      salaryDay: salDia,
+      rememberLogin
+    });
+    rootState.currentUserId = id;
+    rootState.sessions[id] = {
+      mesAtivo: obterMesAtualISO(),
+      meses: {},
+      transacoes: [],
+      notifications: [],
+      smartComparacoes: []
+    };
+    saveState();
+    iniciarAppDepoisLogin();
+    mostrarToast("Conta criada com sucesso.");
+  }
+
+  function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+    const password = document.getElementById("loginPassword").value.trim();
+    const user = rootState.users.find(u => u.email === email && u.password === password);
+    if (!user) {
+      mostrarToast("Credenciais inválidas.");
+      return;
+    }
+    const rememberEl = document.getElementById("loginRemember");
+    const rememberLogin = rememberEl ? rememberEl.checked : true;
+    user.rememberLogin = rememberLogin;
+    rootState.currentUserId = user.id;
+    saveState();
+    iniciarAppDepoisLogin();
+    mostrarToast("Sessão iniciada.");
+  }
+
+  function handleResetPassword(e) {
+    e.preventDefault();
+    const email = document.getElementById("recEmail").value.trim().toLowerCase();
+    const newPass = document.getElementById("recNewPassword").value.trim();
+    const user = rootState.users.find(u => u.email === email);
+    if (!user) {
+      mostrarToast("Não encontrei utilizador com esse identificador.");
+      return;
+    }
+    if (!newPass) {
+      mostrarToast("A nova palavra-passe não pode estar vazia.");
+      return;
+    }
+    user.password = newPass;
+    saveState();
+    mostrarToast("Palavra-passe atualizada.");
+  }
+
+  function logout() {
+    abrirModalConfirm("Terminar sessão", "Tens a certeza que queres sair?", () => {
+      rootState.currentUserId = null;
+      saveState();
+      document.getElementById("appShell").style.display = "none";
+      document.getElementById("authOverlay").style.display = "flex";
+
+      const assistantToggle = document.getElementById("assistantToggle");
+      const assistantPanel = document.getElementById("assistantPanel");
+      if (assistantToggle) assistantToggle.style.display = "none";
+      if (assistantPanel) assistantPanel.classList.remove("active");
+    });
+  }
+
+  // -------------------- UI PRINCIPAL --------------------
+  function iniciarAppDepoisLogin() {
+    selectedCalendarDate = null;
+    const appShell = document.getElementById("appShell");
+    const authOverlay = document.getElementById("authOverlay");
+    authOverlay.style.display = "none";
+    appShell.style.display = "flex";
+
+    const assistantToggle = document.getElementById("assistantToggle");
+    const assistantPanel = document.getElementById("assistantPanel");
+    if (assistantToggle) assistantToggle.style.display = "inline-flex";
+    if (assistantPanel) assistantPanel.classList.remove("active");
+
+    const session = getSession();
+    const mesAtivo = session.mesAtivo || obterMesAtualISO();
+    const mesInput = document.getElementById("mesReferencia");
+    mesInput.value = mesAtivo;
+
+    // data default para nova transação
+    const inputDataTrans = document.getElementById("dataTransacao");
+    const hojeISO = new Date().toISOString().slice(0, 10);
+    inputDataTrans.value = hojeISO;
+
+    atualizarTodayChip();
+    atualizarUserChip();
+    atualizarBadgeNotificacoes();
+    atualizarTudo();
+    inicializarAssistente();
+  }
+
+  function atualizarTodayChip() {
+    const chip = document.getElementById("todayChip");
+    const hoje = new Date();
+    chip.textContent = hoje.toLocaleDateString("pt-PT", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
+  }
+
+  function atualizarUserChip() {
+    const user = getCurrentUser();
+    const chip = document.getElementById("userChip");
+    if (!user) {
+      chip.textContent = "";
+      return;
+    }
+    chip.textContent = `${user.nome} (${user.email})`;
+  }
+
+  function trocarSecao(sec) {
+    document.querySelectorAll(".nav-button").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.sectionTarget === sec);
+    });
+    document.querySelectorAll(".section").forEach(s => {
+      s.classList.toggle("active", s.id === "section-" + sec);
+    });
+  }
+
+  function atualizarTudo() {
+    atualizarDashboard();
+    atualizarTabelaTransacoes();
+    atualizarCalendario();
+    atualizarTabelaCalendario();
+    atualizarGraficos();
+    atualizarSavingsNav();
+    atualizarAssistenteResumo();
+  }
+
+  // NAVBAR SOMA DE POUPANÇA
+  function atualizarSavingsNav() {
+    const valueEl = document.getElementById("savingsValue");
+    const captionEl = document.getElementById("savingsCaption");
+    const mesRef = obterMesAtivo();
+    const session = getSession();
+
+    if (!session) return;
+
+    if (savingsView === "DIA") {
+      const resumoDia = calcularResumoDia(mesRef, selectedCalendarDate);
+      valueEl.textContent = formatarMoeda(resumoDia.saldoDia);
+      captionEl.textContent =
+        `Saldo do dia (${formatarDataCurta(resumoDia.dataISO)}) com base no saldo inicial, salário, extras e despesas do dia.`;
+    } else if (savingsView === "MES") {
+      const res = calcularResumoMes(mesRef);
+      valueEl.textContent = formatarMoeda(res.poupancaMensalReal);
+      captionEl.textContent =
+        "Poupança líquida do mês (saldo inicial + salário + extras − despesas).";
+    } else {
+      let total = 0;
+      const meses = Object.keys(session.meses || {}).sort();
+      for (const mesKey of meses) {
+        const r = calcularResumoMes(mesKey);
+        total += r.poupancaMensalReal || 0;
+      }
+      valueEl.textContent = formatarMoeda(total);
+      captionEl.textContent =
+        "Poupança líquida acumulada desde que começaste a usar o Management Money.";
+    }
+
+    document.querySelectorAll(".savings-tab").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.view === savingsView);
+    });
+  }
+
+function atualizarDashboard() {
+    const mesRef = obterMesAtivo();
+    const resumoMes = calcularResumoMes(mesRef);
+    const resumoDia = calcularResumoDia(mesRef, selectedCalendarDate || null);
+
+    document.getElementById("resumoGastoHoje").textContent = formatarMoeda(
+      resumoDia.despesasHoje
+    );
+    document.getElementById("resumoRecebHoje").textContent = formatarMoeda(
+      resumoDia.extrasHoje + resumoDia.salarioHoje
+    );
+    document.getElementById("resumoSaldoDia").textContent = formatarMoeda(
+      resumoDia.saldoDia
+    );
+
+    const labelDia = selectedCalendarDate
+      ? "Dia em análise: " + formatarDataCurta(selectedCalendarDate)
+      : "Dia em análise: hoje (ou primeiro dia do mês, se fores a outro mês).";
+    document.getElementById("infoResumoDiario").textContent = labelDia;
+
+    document.getElementById("saldoInicial").value =
+      resumoMes.saldoInicial || "";
+    document.getElementById("rendimentoMensal").value =
+      resumoMes.salarioMes || "";
+    document.getElementById("objetivoPoupanca").value =
+      resumoMes.objetivo || "";
+
+    document.getElementById("resumoDisponivel").textContent = formatarMoeda(
+      resumoMes.disponivelParaGastar
+    );
+    document.getElementById("resumoLimiteDiario").textContent = formatarMoeda(
+      resumoMes.limiteDiario
+    );
+    document.getElementById(
+      "resumoPoupancaEstimada"
+    ).textContent = formatarMoeda(resumoMes.poupancaEstimada);
+    document.getElementById("resumoDespesas").textContent = formatarMoeda(
+      resumoMes.totalDespesas
+    );
+    document.getElementById(
+      "resumoReceitasExtra"
+    ).textContent = formatarMoeda(resumoMes.totalReceitasExtra);
+    document.getElementById("resumoTaxaPoupanca").textContent =
+      formatarPercentagem(resumoMes.taxaPoupanca);
+    document.getElementById(
+      "resumoPoupadoAteAgora"
+    ).textContent = formatarMoeda(calcularTotalPoupadoAteAgora());
+  }
+
+  function guardarConfigMes(e) {
+    e.preventDefault();
+    const mesRef = obterMesAtivo();
+    const cfg = obterConfigMes(mesRef);
+    cfg.saldoInicial =
+      parseFloat(document.getElementById("saldoInicial").value) || 0;
+    cfg.rendimentoMensal =
+      parseFloat(document.getElementById("rendimentoMensal").value) || 0;
+    cfg.objetivoPoupanca =
+      parseFloat(document.getElementById("objetivoPoupanca").value) || 0;
+    saveState();
+    atualizarTudo();
+    mostrarToast("Configuração do mês guardada.");
+  }
+
+  function reporValoresMes() {
+    const mesRef = obterMesAtivo();
+    const user = getCurrentUser();
+    const cfg = obterConfigMes(mesRef);
+    cfg.saldoInicial = 0;
+    cfg.rendimentoMensal = user?.salaryDefault || 0;
+    cfg.objetivoPoupanca = cfg.rendimentoMensal * 0.2;
+    saveState();
+    atualizarDashboard();
+    atualizarSavingsNav();
+    mostrarToast("Valores do mês repostos a partir do salário típico.");
+  }
+
+  // -------------------- CALENDÁRIO --------------------
+  function atualizarCalendario() {
+    const grid = document.getElementById("calendarGrid");
+    const mesRef = obterMesAtivo();
+    const session = getSession();
+    const user = getCurrentUser();
+    const [anoStr, mesStr] = mesRef.split("-");
+    const ano = parseInt(anoStr, 10);
+    const mesIdx = parseInt(mesStr, 10) - 1;
+
+    grid.innerHTML = "";
+
+    const diasSemana = ["S", "T", "Q", "Q", "S", "S", "D"]; // começa em domingo
+    diasSemana.forEach(d => {
+      const el = document.createElement("div");
+      el.className = "calendar-weekday";
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+
+    const primeiroDia = new Date(ano, mesIdx, 1);
+    const inicioSemana = primeiroDia.getDay(); // 0 domingo
+
+    const ultimoDia = new Date(ano, mesIdx + 1, 0);
+    const totalDias = ultimoDia.getDate();
+
+    for (let i = 0; i < inicioSemana; i++) {
+      const empty = document.createElement("div");
+      empty.className = "calendar-day calendar-day-empty";
+      grid.appendChild(empty);
+    }
+
+    const transacoesMes = obterTransacoesMes(mesRef);
+
+    for (let dia = 1; dia <= totalDias; dia++) {
+      const dataISO = `${anoStr}-${mesStr}-${String(dia).padStart(2, "0")}`;
+      const cell = document.createElement("div");
+      cell.className = "calendar-day";
+      cell.dataset.date = dataISO;
+
+      const num = document.createElement("div");
+      num.className = "calendar-day-number";
+      num.textContent = dia;
+
+      const info = document.createElement("div");
+      info.className = "calendar-day-info";
+
+      let totalDesp = 0;
+      let totalRec = 0;
+
+      for (const t of transacoesMes) {
+        if (t.dataISO === dataISO) {
+          if (t.tipo === "DESPESA") totalDesp += t.valor;
+          if (t.tipo === "RECEITA_EXTRA") totalRec += t.valor;
+        }
+      }
+
+      if (dia === user.salaryDay) {
+        cell.classList.add("salary-day");
+      }
+
+      if (totalDesp > 0 && totalRec > 0) cell.classList.add("has-both");
+      else if (totalDesp > 0) cell.classList.add("has-expense");
+      else if (totalRec > 0) cell.classList.add("has-income");
+
+      if (selectedCalendarDate === dataISO) {
+        cell.classList.add("selected");
+      }
+
+      const partes = [];
+      if (totalDesp > 0) partes.push("−" + formatarMoeda(totalDesp));
+      if (totalRec > 0) partes.push("+" + formatarMoeda(totalRec));
+      info.textContent = partes.join(" | ");
+
+      cell.appendChild(num);
+      cell.appendChild(info);
+      grid.appendChild(cell);
+    }
+
+    document.getElementById(
+      "calendarLegend"
+    ).textContent = `${mesStr}/${anoStr} · Salário no dia ${user.salaryDay}`;
+  }
+
+  function atualizarTabelaCalendario() {
+    const tbody = document.getElementById("tbodyCalendario");
+    const mesRef = obterMesAtivo();
+    const session = getSession();
+    let lista = session.transacoes.filter(t => t.mesRef === mesRef);
+    let label = "Sem dia selecionado – a tabela mostra o mês completo.";
+
+    if (selectedCalendarDate) {
+      lista = lista.filter(t => t.dataISO === selectedCalendarDate);
+      label =
+        "Dia selecionado: " +
+        formatarDataCurta(selectedCalendarDate) +
+        " (apenas movimentos deste dia)";
+    }
+
+    document.getElementById("calendarSelectedLabel").textContent = label;
+    lista.sort((a, b) => a.dataISO.localeCompare(b.dataISO));
+
+    tbody.innerHTML = "";
+    if (!lista.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 6;
+      td.textContent = "Sem movimentos para o período.";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    for (const t of lista) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${formatarDataCurta(t.dataISO)}</td>
+        <td>
+          <span class="tag ${
+            t.tipo === "DESPESA" ? "tag-expense" : "tag-income"
+          }">${t.tipo === "DESPESA" ? "Despesa" : "Recebimento extra"}</span>
+        </td>
+        <td>${t.categoria || "-"}</td>
+        <td>${t.descricao || "-"}</td>
+        <td>${formatarMoeda(t.valor)}</td>
+        <td class="actions-cell">
+          <button class="button button-ghost button-xs" data-action="edit" data-id="${t.id}">Editar</button>
+          <button class="button button-outline button-xs" data-action="delete" data-id="${t.id}">X</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // -------------------- TRANSAÇÕES --------------------
+  function atualizarTabelaTransacoes() {
+    const tbody = document.getElementById("tbodyTransacoes");
+    const mesRef = obterMesAtivo();
+    const lista = obterTransacoesMes(mesRef).slice().sort((a, b) =>
+      a.dataISO.localeCompare(b.dataISO)
+    );
+
+    tbody.innerHTML = "";
+    if (!lista.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 6;
+      td.textContent = "Sem transações registadas para este mês.";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    for (const t of lista) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${formatarDataCurta(t.dataISO)}</td>
+        <td>
+          <span class="tag ${
+            t.tipo === "DESPESA" ? "tag-expense" : "tag-income"
+          }">${t.tipo === "DESPESA" ? "Despesa" : "Recebimento extra"}</span>
+        </td>
+        <td>${t.categoria || "-"}</td>
+        <td>${t.descricao || "-"}</td>
+        <td>${formatarMoeda(t.valor)}</td>
+        <td class="actions-cell">
+          <button class="button button-ghost button-xs" data-action="edit" data-id="${t.id}">Editar</button>
+          <button class="button button-outline button-xs" data-action="delete" data-id="${t.id}">X</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function handleNovaTransacao(e) {
+    e.preventDefault();
+    const tipo = document.getElementById("tipoTransacao").value;
+    const dataISO = document.getElementById("dataTransacao").value;
+    const cat = document.getElementById("categoriaTransacao").value.trim() || "Outros";
+    const valRaw = document.getElementById("valorTransacao").value;
+    const val = parseFloat(valRaw);
+    const desc = document.getElementById("descricaoTransacao").value.trim();
+
+    if (!dataISO || !isFinite(val) || val <= 0) {
+      mostrarToast("Preenche a data e um valor positivo.");
+      return;
+    }
+
+    const mesRef = dataISO.slice(0, 7);
+    const session = getSession();
+    session.transacoes.push({
+      id: gerarId(),
+      tipo,
+      dataISO,
+      mesRef,
+      categoria: cat,
+      descricao: desc,
+      valor: val
+    });
+
+    // mudar mês ativo para o da transação
+    setMesAtivo(mesRef);
+    document.getElementById("mesReferencia").value = mesRef;
+    selectedCalendarDate = dataISO;
+
+    saveState();
+
+    const resumoDia = calcularResumoDia(mesRef, dataISO);
+    registarNotificacaoLimite(resumoDia);
+
+    document.getElementById("formTransacao").reset();
+    document.getElementById("dataTransacao").value = dataISO; // manter dia
+    atualizarTudo();
+    mostrarToast("Transação adicionada.");
+  }
+
+
+
+  // Importar transações a partir de ficheiros (template, CSV, etc.)
+  function parseLinhaTransacaoBruta(linha) {
+    if (!linha) return null;
+    const raw = linha.trim();
+    if (!raw) return null;
+
+    // Ignorar cabeçalho típico ou comentários
+    const upper = raw.toUpperCase();
+    if (upper.startsWith("DATA;") || upper.includes(";TIPO;")) return null;
+    if (raw.startsWith("#")) return null;
+
+    const partes = raw.split(";");
+    if (partes.length < 3) return null;
+
+    let [dataTxt, tipoTxt, catTxt, descTxt, valorTxt] = partes.map(p => p.trim());
+    const tipoUpper = (tipoTxt || "").toUpperCase();
+    const tipo =
+      tipoUpper === "RECEITA" ||
+      tipoUpper === "RECEITA_EXTRA" ||
+      tipoUpper === "ENTRADA"
+        ? "RECEITA_EXTRA"
+        : "DESPESA";
+
+    // tentar detetar data (YYYY-MM-DD ou DD/MM/YYYY)
+    let dataISO = "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dataTxt)) {
+      dataISO = dataTxt;
+    } else {
+      const m = dataTxt.match(/^(\d{1,2})[\/](\d{1,2})[\/](\d{4})$/);
+      if (m) {
+        const d = m[1].padStart(2, "0");
+        const mo = m[2].padStart(2, "0");
+        const y = m[3];
+        dataISO = `${y}-${mo}-${d}`;
+      }
+    }
+
+    const valor = parseFloat((valorTxt || "").replace(",", "."));
+    if (!dataISO || !isFinite(valor) || valor <= 0) return null;
+
+    return {
+      dataISO,
+      tipo,
+      categoria: catTxt || "Outros",
+      descricao: descTxt || "",
+      valor
+    };
+  }
+
+  function importarTransacoesDeTexto(conteudo) {
+    const linhas = conteudo.split(/\r?\n/);
+    const lista = [];
+    for (const linha of linhas) {
+      const t = parseLinhaTransacaoBruta(linha);
+      if (t) lista.push(t);
+    }
+    if (!lista.length) {
+      mostrarToast("Não encontrei transações válidas no ficheiro. Usa o template para garantir o formato.");
+      return;
+    }
+
+    const session = getSession();
+    if (!session) {
+      mostrarToast("Inicia sessão antes de importar transações.");
+      return;
+    }
+
+    let adicionadas = 0;
+    for (const t of lista) {
+      const mesRef = t.dataISO.slice(0, 7);
+      session.transacoes.push({
+        id: gerarId(),
+        tipo: t.tipo,
+        dataISO: t.dataISO,
+        mesRef,
+        categoria: t.categoria || "Outros",
+        descricao: t.descricao || "",
+        valor: t.valor
+      });
+
+      setMesAtivo(mesRef);
+      document.getElementById("mesReferencia").value = mesRef;
+      selectedCalendarDate = t.dataISO;
+
+      const resumoDia = calcularResumoDia(mesRef, t.dataISO);
+      registarNotificacaoLimite(resumoDia);
+      adicionadas++;
+    }
+
+    saveState();
+    atualizarTudo();
+    mostrarToast(adicionadas + " transações importadas a partir dos ficheiros.");
+  }
+
+  function processarUploadsTransacoes(inputId) {
+    const fileInput = document.getElementById(inputId);
+    if (!fileInput || !fileInput.files || !fileInput.files.length) {
+      mostrarToast("Seleciona pelo menos um ficheiro para importar.");
+      return;
+    }
+
+    const suportadosTexto = [".txt", ".csv"];
+    let ficheirosTexto = [];
+
+    for (const f of fileInput.files) {
+      const nome = (f.name || "").toLowerCase();
+      if (suportadosTexto.some(ext => nome.endsWith(ext))) {
+        ficheirosTexto.push(f);
+      }
+    }
+
+    if (!ficheirosTexto.length) {
+      mostrarToast("Neste momento a leitura automática é suportada apenas para ficheiros de texto ou CSV. Usa o template disponível.");
+      return;
+    }
+
+    let restantes = ficheirosTexto.length;
+    let buffer = "";
+
+    ficheirosTexto.forEach(f => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        buffer += "\n" + (e.target.result || "");
+        restantes -= 1;
+        if (restantes === 0) {
+          importarTransacoesDeTexto(buffer);
+        }
+      };
+      reader.onerror = () => {
+        restantes -= 1;
+        if (restantes === 0 && buffer) {
+          importarTransacoesDeTexto(buffer);
+        }
+      };
+      reader.readAsText(f, "utf-8");
+    });
+  }
+
+  function descarregarTemplateTransacoes() {
+    const cabecalho = "DATA;TIPO;CATEGORIA;DESCRICAO;VALOR";
+    const exemplo1 = "2025-01-05;DESPESA;Supermercado;Compras da semana;54.20";
+    const exemplo2 = "2025-01-06;RECEITA_EXTRA;Venda;Venda de artigo usado;35.00";
+    const conteudo = [cabecalho, exemplo1, exemplo2].join("\n");
+
+    const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "template_transacoes_management_money.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+
+  function limparTransacoesMesAtual() {
+    const mesRef = obterMesAtivo();
+    abrirModalConfirm(
+      "Limpar transações",
+      "Queres mesmo apagar todas as transações deste mês?",
+      () => {
+        const session = getSession();
+        session.transacoes = session.transacoes.filter(t => t.mesRef !== mesRef);
+        saveState();
+        atualizarTudo();
+        mostrarToast("Transações do mês apagadas.");
+      }
+    );
+  }
+
+  // EDITAR / ELIMINAR TRANSAÇÕES
+  function abrirModalEditarTransacao(id) {
+    const session = getSession();
+    if (!session) return;
+    const t = session.transacoes.find(tr => tr.id === id);
+    if (!t) return;
+    transacaoEmEdicaoId = id;
+
+    document.getElementById("editTransId").value = t.id;
+    document.getElementById("editTipoTransacao").value = t.tipo;
+    document.getElementById("editDataTransacao").value = t.dataISO;
+    document.getElementById("editCategoriaTransacao").value = t.categoria || "";
+    document.getElementById("editValorTransacao").value = t.valor.toString().replace(".", ",").replace(",", ".");
+    document.getElementById("editDescricaoTransacao").value = t.descricao || "";
+
+    document.getElementById("editTransOverlay").classList.add("active");
+  }
+
+  function fecharModalEditarTransacao() {
+    document.getElementById("editTransOverlay").classList.remove("active");
+    transacaoEmEdicaoId = null;
+    document.getElementById("formEditarTransacao").reset();
+  }
+
+  function handleEditarTransacaoSubmit(e) {
+    e.preventDefault();
+    if (!transacaoEmEdicaoId) {
+      fecharModalEditarTransacao();
+      return;
+    }
+    const session = getSession();
+    if (!session) return;
+    const t = session.transacoes.find(tr => tr.id === transacaoEmEdicaoId);
+    if (!t) {
+      fecharModalEditarTransacao();
+      return;
+    }
+
+    const tipo = document.getElementById("editTipoTransacao").value;
+    const dataISO = document.getElementById("editDataTransacao").value;
+    const cat = document.getElementById("editCategoriaTransacao").value.trim() || "Outros";
+    const valRaw = document.getElementById("editValorTransacao").value;
+    const val = parseFloat(valRaw);
+    const desc = document.getElementById("editDescricaoTransacao").value.trim();
+
+    if (!dataISO || !isFinite(val) || val <= 0) {
+      mostrarToast("Preenche a data e um valor positivo.");
+      return;
+    }
+
+    const novoMesRef = dataISO.slice(0, 7);
+
+    t.tipo = tipo;
+    t.dataISO = dataISO;
+    t.mesRef = novoMesRef;
+    t.categoria = cat;
+    t.descricao = desc;
+    t.valor = val;
+
+    saveState();
+
+    setMesAtivo(novoMesRef);
+    document.getElementById("mesReferencia").value = novoMesRef;
+    selectedCalendarDate = dataISO;
+
+    fecharModalEditarTransacao();
+    atualizarTudo();
+    mostrarToast("Transação atualizada.");
+  }
+
+  function eliminarTransacao(id) {
+    const session = getSession();
+    if (!session) return;
+    session.transacoes = session.transacoes.filter(t => t.id !== id);
+    saveState();
+    atualizarTudo();
+    mostrarToast("Transação eliminada.");
+  }
+
+  // -------------------- RELATÓRIOS / GRÁFICOS --------------------
+  function obterTransacoesPeriodo(visao) {
+    const session = getSession();
+    const mesRef = obterMesAtivo();
+    const [anoStr, mesStr] = mesRef.split("-");
+    const trans = session.transacoes || [];
+    const hoje = new Date();
+    const hojeISO = hoje.toISOString().slice(0, 10);
+    const diaSelecionado = selectedCalendarDate || hojeISO;
+
+    if (visao === "DIA") {
+      return trans.filter(t => t.dataISO === diaSelecionado);
+    }
+    if (visao === "MES") {
+      return trans.filter(t => t.mesRef === mesRef);
+    }
+    if (visao === "ANO") {
+      return trans.filter(t => t.dataISO.startsWith(anoStr + "-"));
+    }
+    if (visao === "TODOS") {
+      return trans.slice();
+    }
+    return trans.slice();
+  }
+
+  function atualizarGraficos() {
+    const visao = document.getElementById("visaoRelatorios").value;
+    const transPeriodo = obterTransacoesPeriodo(visao);
+    const session = getSession();
+
+    // categorias (apenas despesas)
+    const catMap = {};
+    for (const t of transPeriodo) {
+      if (t.tipo !== "DESPESA") continue;
+      const c = t.categoria || "Outros";
+      catMap[c] = (catMap[c] || 0) + t.valor;
+    }
+    const catLabels = Object.keys(catMap);
+    const catVals = catLabels.map(c => catMap[c]);
+
+    const ctxCat = document.getElementById("graficoDespesasCategoria").getContext("2d");
+    if (chartDespesasCategoria) chartDespesasCategoria.destroy();
+    chartDespesasCategoria = new Chart(ctxCat, {
+      type: "pie",
+      data: {
+        labels: catLabels.length ? catLabels : ["Sem dados"],
+        datasets: [
+          {
+            data: catVals.length ? catVals : [1],
+            backgroundColor: catVals.length
+              ? ["#8B5E3C", "#D9A066", "#C4B28A", "#4B3B2B", "#F2E9E4", "#9C6644"]
+              : ["#4B3B2B"],
+            borderColor: "#2B1B12",
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              boxWidth: 12,
+              color: "#F5E9DD",
+              font: { size: 10 }
+            }
+          },
+          tooltip: {
+            backgroundColor: "#050404",
+            titleColor: "#F5E9DD",
+            bodyColor: "#E5D5C3",
+            borderColor: "#D9A066",
+            borderWidth: 1
+          }
+        }
+      }
+    });
+
+    // poupança acumulada
+    let labels = [];
+    let valores = [];
+
+    if (visao === "DIA") {
+      const dia = selectedCalendarDate || new Date().toISOString().slice(0, 10);
+      labels = [formatarDataCurta(dia)];
+      const mesRef = dia.slice(0, 7);
+      const rDia = calcularResumoDia(mesRef, dia);
+      valores = [rDia.saldoDia];
+      document.getElementById("tituloGraficoDireito").textContent =
+        "Saldo do dia";
+      document.getElementById("captionGraficoDireito").textContent =
+        "Saldo (entradas - despesas) no dia selecionado.";
+    } else if (visao === "MES") {
+      const mesRef = obterMesAtivo();
+      const [aStr, mStr] = mesRef.split("-");
+      const ano = parseInt(aStr, 10);
+      const mes = parseInt(mStr, 10) - 1;
+      const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+
+      let acumulado = 0;
+      const cfg = obterConfigMes(mesRef);
+      const salarioMes = Number(cfg.rendimentoMensal) || 0;
+      const user = getCurrentUser();
+      const salaryDay = user.salaryDay;
+
+      for (let d = 1; d <= ultimoDia; d++) {
+        const dataISO = `${aStr}-${mStr}-${String(d).padStart(2, "0")}`;
+        const tsDia = (session.transacoes || []).filter(
+          t => t.dataISO === dataISO
+        );
+        let entradasDia = 0;
+        let despesasDia = 0;
+
+        if (d === salaryDay) entradasDia += salarioMes;
+        for (const t of tsDia) {
+          if (t.tipo === "DESPESA") despesasDia += t.valor;
+          if (t.tipo === "RECEITA_EXTRA") entradasDia += t.valor;
+        }
+
+        acumulado += entradasDia - despesasDia;
+        labels.push(String(d));
+        valores.push(acumulado);
+      }
+
+      document.getElementById("tituloGraficoDireito").textContent =
+        "Poupança acumulada no mês";
+      document.getElementById("captionGraficoDireito").textContent =
+        "Saldo acumulado dia a dia para o mês em análise.";
+    } else if (visao === "ANO" || visao === "TODOS") {
+      const mapMes = {};
+      for (const t of session.transacoes || []) {
+        const mes = t.mesRef;
+        if (!mapMes[mes]) {
+          const cfg = obterConfigMes(mes);
+          mapMes[mes] = {
+            mes,
+            salario: Number(cfg.rendimentoMensal) || 0,
+            despesas: 0,
+            extras: 0
+          };
+        }
+        if (t.tipo === "DESPESA") mapMes[mes].despesas += t.valor;
+        if (t.tipo === "RECEITA_EXTRA") mapMes[mes].extras += t.valor;
+      }
+      let pares = Object.values(mapMes);
+      if (visao === "ANO") {
+        const anoStr = obterMesAtivo().slice(0, 4);
+        pares = pares.filter(p => p.mes.startsWith(anoStr + "-"));
+      }
+      pares.sort((a, b) => a.mes.localeCompare(b.mes));
+
+      let acumulado = 0;
+      for (const p of pares) {
+        const poupan = p.salario + p.extras - p.despesas;
+        acumulado += poupan;
+        labels.push(p.mes);
+        valores.push(acumulado);
+      }
+
+      document.getElementById("tituloGraficoDireito").textContent =
+        visao === "ANO" ? "Poupança acumulada no ano" : "Poupança acumulada (todos os anos)";
+      document.getElementById("captionGraficoDireito").textContent =
+        "Evolução da poupança ao longo dos meses.";
+    }
+
+    const ctxP = document.getElementById("graficoPoupancaDia").getContext("2d");
+    if (chartPoupanca) chartPoupanca.destroy();
+    chartPoupanca = new Chart(ctxP, {
+      type: "line",
+      data: {
+        labels: labels.length ? labels : [""],
+        datasets: [
+          {
+            data: valores.length ? valores : [0],
+            fill: false,
+            tension: 0.25,
+            borderColor: "#D9A066",
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: "#FCEBD4",
+            pointBorderColor: "#2B1B12",
+            pointHoverRadius: 5,
+            pointHitRadius: 8
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "#050404",
+            titleColor: "#F5E9DD",
+            bodyColor: "#E5D5C3",
+            borderColor: "#D9A066",
+            borderWidth: 1
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: "#D9C2A9", font: { size: 10 } },
+            grid: { color: "rgba(80,60,42,0.25)" }
+          },
+          y: {
+            ticks: { color: "#D9C2A9", font: { size: 10 } },
+            grid: { color: "rgba(80,60,42,0.25)" }
+          }
+        }
+      }
+    });
+  }
+
+  // -------------------- EXPORTAÇÃO --------------------
+  function prepararDadosExportacao() {
+    const periodo = document.getElementById("periodoExportacao").value;
+    const session = getSession();
+    const mesRef = obterMesAtivo();
+    const hoje = new Date();
+    const hojeISO = hoje.toISOString().slice(0, 10);
+    const diaSel = selectedCalendarDate || hojeISO;
+
+    let descricao = "";
+    let trans = [];
+    let resumo = null;
+
+    if (periodo === "DIA_ATUAL") {
+      trans = session.transacoes.filter(t => t.dataISO === diaSel);
+      descricao = "Dia " + formatarDataCurta(diaSel);
+      resumo = calcularResumoDia(diaSel.slice(0, 7), diaSel);
+    } else if (periodo === "MES_ATUAL") {
+      trans = obterTransacoesMes(mesRef);
+      descricao = "Mês " + mesRef;
+      resumo = calcularResumoMes(mesRef);
+    } else if (periodo === "ANO_ATUAL") {
+      const anoStr = mesRef.slice(0, 4);
+      trans = session.transacoes.filter(t => t.dataISO.startsWith(anoStr + "-"));
+      descricao = "Ano " + anoStr;
+    } else {
+      trans = session.transacoes.slice();
+      descricao = "Todos os dados";
+    }
+
+    trans.sort((a, b) => a.dataISO.localeCompare(b.dataISO));
+    return { trans, descricao, resumo };
+  }
+
+  function exportarExcel() {
+    const { trans, descricao, resumo } = prepararDadosExportacao();
+
+    let totalDespesas = 0;
+    let totalExtras = 0;
+    const categorias = {};
+    trans.forEach(t => {
+      if (t.tipo === "DESPESA") totalDespesas += t.valor;
+      else totalExtras += t.valor;
+      const cat = t.categoria || "Outros";
+      categorias[cat] = (categorias[cat] || 0) + t.valor;
+    });
+    const saldo = (resumo && typeof resumo.saldo === "number")
+      ? resumo.saldo
+      : (totalExtras + (resumo?.salarioMes || 0) - totalDespesas);
+
+    const resumoCategorias = Object.keys(categorias)
+      .sort()
+      .map(cat => `<tr><td>${cat}</td><td>${categorias[cat].toFixed(2)}</td></tr>`)
+      .join("");
+
+    // If SheetJS is available, generate a real .xlsx workbook
+    if (window.XLSX) {
+      try {
+        const wb = XLSX.utils.book_new();
+
+        // Resumo sheet
+        const resumoRows = [
+          { Campo: 'Relatório', Valor: descricao },
+          { Campo: 'Gerado em', Valor: new Date().toLocaleString('pt-PT') },
+          { Campo: 'Total despesas', Valor: totalDespesas },
+          { Campo: 'Total extras', Valor: totalExtras },
+          { Campo: 'Saldo líquido', Valor: saldo }
+        ];
+        if (resumo && typeof resumo.salarioMes === 'number') {
+          resumoRows.push({ Campo: 'Salário do mês', Valor: resumo.salarioMes });
+        }
+        const wsResumo = XLSX.utils.json_to_sheet(resumoRows);
+        XLSX.utils.book_append_sheet(wb, wsResumo, 'Resumo');
+
+        // Transações sheet
+        const transRows = trans.map(t => ({
+          Data: formatarDataCurta(t.dataISO),
+          Tipo: t.tipo === 'DESPESA' ? 'Despesa' : 'Receb. extra',
+          Categoria: t.categoria || '-',
+          Descricao: t.descricao || '-',
+          Valor: Number(t.valor)
+        }));
+        const wsTrans = XLSX.utils.json_to_sheet(transRows);
+        XLSX.utils.book_append_sheet(wb, wsTrans, 'Transações');
+
+        // Categorias sheet
+        const categoriasRows = Object.keys(categorias).sort().map(cat => ({ Categoria: cat, Valor: categorias[cat] }));
+        if (categoriasRows.length) {
+          const wsCats = XLSX.utils.json_to_sheet(categoriasRows);
+          XLSX.utils.book_append_sheet(wb, wsCats, 'Categorias');
+        }
+
+        const sufixo = descricao.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const filename = `management_money_${sufixo}.xlsx`;
+        XLSX.writeFile(wb, filename);
+        return;
+      } catch (err) {
+        console.error('Falha na geração do .xlsx, a fazer fallback para .xls HTML', err);
+        // fallback to HTML below
+      }
+    }
+
+    // Fallback: HTML-based .xls (styled)
+    const html = `
+      <!doctype html>
+      <html lang="pt-PT">
+      <head>
+        <meta charset="utf-8" />
+        <style>
+          body{font-family:Segoe UI,Calibri,Arial,sans-serif;background:#ffffff;color:#111827;margin:0;padding:12px}
+          .header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+          .logo{width:46px;height:46px;border-radius:8px;background:#8F223A;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+          h1{font-size:18px;margin:0}
+          .meta{color:#6b7280;font-size:12px}
+          .cards{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+          .card{background:#F9FAFB;border-radius:10px;padding:8px 10px;border:1px solid #E6D7C8;min-width:140px}
+          .card .label{font-size:11px;color:#6b7280}
+          .card .value{font-weight:700;font-size:14px;margin-top:4px}
+          table{width:100%;border-collapse:collapse;margin-top:12px}
+          th,td{padding:8px 10px;border:1px solid #e6d7c8;font-size:12px}
+          th{background:#f2efec;text-align:left;color:#3b2a20}
+          tr:nth-child(even) td{background:#fbf7f4}
+          .foot{font-size:11px;color:#6b7280;margin-top:10px}
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">MM</div>
+          <div>
+            <h1>Management Money</h1>
+            <div class="meta">${descricao} · Gerado em ${new Date().toLocaleString('pt-PT')}</div>
+          </div>
+        </div>
+
+        <div class="cards">
+          <div class="card"><div class="label">Total despesas</div><div class="value">${formatarMoeda(totalDespesas)}</div></div>
+          <div class="card"><div class="label">Total extras</div><div class="value">${formatarMoeda(totalExtras)}</div></div>
+          <div class="card"><div class="label">Saldo líquido</div><div class="value">${formatarMoeda(saldo)}</div></div>
+          ${resumo && typeof resumo.salarioMes === 'number' ? `<div class="card"><div class="label">Salário do mês</div><div class="value">${formatarMoeda(resumo.salarioMes)}</div></div>` : ''}
+        </div>
+
+        <table>
+          <thead>
+            <tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th style="text-align:right">Valor</th></tr>
+          </thead>
+          <tbody>
+            ${trans.map(t => `
+              <tr>
+                <td>${formatarDataCurta(t.dataISO)}</td>
+                <td>${t.tipo === 'DESPESA' ? 'Despesa' : 'Receb. extra'}</td>
+                <td>${(t.categoria || '-')}</td>
+                <td>${(t.descricao || '-')}</td>
+                <td style="text-align:right">${formatarMoeda(t.valor)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        ${Object.keys(categorias).length ? `
+          <h3 style="margin-top:14px">Totais por categoria</h3>
+          <table>
+            <thead><tr><th>Categoria</th><th style="text-align:right">Valor</th></tr></thead>
+            <tbody>
+              ${Object.keys(categorias).sort().map(cat => `<tr><td>${cat}</td><td style="text-align:right">${Number(categorias[cat]).toLocaleString('pt-PT', {minimumFractionDigits:2,maximumFractionDigits:2})} €</td></tr>`).join('')}
+            </tbody>
+          </table>
+        ` : ''}
+
+        <div class="foot">Relatório gerado automaticamente pelo Management Money · Dados guardados localmente</div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const sufixo = descricao.replace(/[^a-zA-Z0-9_-]/g, '_');
+    a.download = `management_money_${sufixo}.xls`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportarPDF() {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert("A biblioteca jsPDF não foi carregada. Verifica a ligação à internet.");
+      return;
+    }
+    const { trans, descricao, resumo } = prepararDadosExportacao();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+
+    doc.setFontSize(18);
+    doc.text("Management Money", 105, 15, { align: "center" });
+
+    doc.setFontSize(12);
+    doc.setTextColor(90, 64, 48);
+    doc.text(descricao, 105, 22, { align: "center" });
+
+    doc.setFontSize(9);
+    doc.setTextColor(120, 92, 70);
+    const agora = new Date().toLocaleString("pt-PT");
+    doc.text("Gerado em: " + agora, 10, 28);
+
+    let y = 36;
+
+
+    // Resumo executivo
+    if (resumo) {
+      doc.setFontSize(12);
+      doc.text("Resumo executivo", 10, y);
+      y += 6;
+      doc.setFontSize(10);
+
+      if ("limiteDiario" in resumo && "despesasHoje" in resumo) {
+        doc.text(
+          `Saldo do dia: ${formatarMoeda(resumo.saldoDia)} · Limite diário: ${formatarMoeda(
+            resumo.limiteDiario
+          )}`,
+          10,
+          y
+        );
+        y += 5;
+        doc.text(
+          `Despesas do dia: ${formatarMoeda(resumo.despesasHoje)} · Entradas do dia: ${formatarMoeda(
+            resumo.extrasHoje + resumo.salarioHoje
+          )}`,
+          10,
+          y
+        );
+        y += 6;
+      } else {
+        doc.text(
+          `Disponível para gastar: ${formatarMoeda(
+            resumo.disponivelParaGastar
+          )} · Limite diário: ${formatarMoeda(resumo.limiteDiario)}`,
+          10,
+          y
+        );
+        y += 5;
+        doc.text(
+          `Despesas do período: ${formatarMoeda(
+            resumo.totalDespesas
+          )} · Extras: ${formatarMoeda(resumo.totalReceitasExtra)}`,
+          10,
+          y
+        );
+        y += 5;
+        doc.text(
+          `Poupança estimada: ${formatarMoeda(
+            resumo.poupancaEstimada
+          )} · Taxa de poupança: ${formatarPercentagem(resumo.taxaPoupanca)}`,
+          10,
+          y
+        );
+        y += 6;
+      }
+    }
+
+    y += 4;
+
+    // Try to embed charts (if charts are present on the page)
+    try {
+      const pieCanvas = document.getElementById('graficoDespesasCategoria');
+      const lineCanvas = document.getElementById('graficoPoupancaDia');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 10;
+      const usableWidth = pageWidth - margin * 2;
+
+      if (pieCanvas && pieCanvas.toDataURL) {
+        const imgPie = pieCanvas.toDataURL('image/png');
+        const pieW = Math.min(usableWidth * 0.48, 90);
+        const propsPie = doc.getImageProperties(imgPie);
+        const pieH = (propsPie.height * pieW) / propsPie.width;
+        doc.addImage(imgPie, 'PNG', margin, y, pieW, pieH);
+      }
+
+      if (lineCanvas && lineCanvas.toDataURL) {
+        const imgLine = lineCanvas.toDataURL('image/png');
+        const lineW = Math.min(usableWidth * 0.48, 90);
+        const propsLine = doc.getImageProperties(imgLine);
+        const lineH = (propsLine.height * lineW) / propsLine.width;
+        const xRight = pageWidth - margin - lineW;
+        doc.addImage(imgLine, 'PNG', xRight, y, lineW, lineH);
+        // set y to max of the two heights to avoid overlapping content
+        const heights = [];
+        if (pieCanvas && pieCanvas.toDataURL) heights.push((doc.getImageProperties(pieCanvas.toDataURL('image/png')).height * Math.min(usableWidth * 0.48, 90)) / doc.getImageProperties(pieCanvas.toDataURL('image/png')).width);
+        heights.push(lineH);
+        const maxH = Math.max.apply(null, heights) || 0;
+        y += maxH + 6;
+      } else {
+        // if only pie present, increase y by its height
+        if (pieCanvas && pieCanvas.toDataURL) {
+          const propsPie = doc.getImageProperties(pieCanvas.toDataURL('image/png'));
+          const pieW = Math.min(usableWidth * 0.48, 90);
+          const pieH = (propsPie.height * pieW) / propsPie.width;
+          y += pieH + 6;
+        }
+      }
+    } catch (err) {
+      console.warn('Não foi possível embutir os gráficos no PDF:', err);
+    }
+
+    doc.setFontSize(11);
+    doc.text("Transações:", 10, y);
+    y += 5;
+
+    doc.setFontSize(9);
+    doc.text("Data", 10, y);
+    doc.text("Tipo", 30, y);
+    doc.text("Categoria", 55, y);
+    doc.text("Descrição", 100, y);
+    doc.text("Valor", 190, y, { align: "right" });
+    y += 4;
+
+    for (const t of trans) {
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+        doc.setFontSize(9);
+        doc.text("Data", 10, y);
+        doc.text("Tipo", 30, y);
+        doc.text("Categoria", 55, y);
+        doc.text("Descrição", 100, y);
+        doc.text("Valor", 190, y, { align: "right" });
+        y += 4;
+      }
+      doc.text(formatarDataCurta(t.dataISO), 10, y);
+      doc.text(t.tipo === "DESPESA" ? "Despesa" : "Receb. extra", 30, y);
+      doc.text((t.categoria || "-").substring(0, 28), 55, y);
+      doc.text((t.descricao || "-").substring(0, 60), 100, y);
+      doc.text(t.valor.toFixed(2) + " €", 190, y, { align: "right" });
+      y += 4;
+    }
+
+    // Rodapé com informação adicional
+    const totalTrans = trans.length;
+    let totalDespesas = 0;
+    let totalExtras = 0;
+    const categorias = {};
+    trans.forEach(t => {
+      if (t.tipo === "DESPESA") totalDespesas += t.valor;
+      else totalExtras += t.valor;
+      const cat = t.categoria || "Outros";
+      categorias[cat] = (categorias[cat] || 0) + t.valor;
+    });
+
+    doc.setFontSize(9);
+    doc.setTextColor(120, 92, 70);
+    doc.text(`Total de transações: ${totalTrans}`, 10, 285);
+    doc.text(`Total de despesas: ${totalDespesas.toFixed(2)} €`, 80, 285);
+    doc.text(`Total de extras: ${totalExtras.toFixed(2)} €`, 150, 285, { align: "right" });
+
+    doc.setFontSize(8);
+    const cats = Object.keys(categorias).sort();
+    let cy = 290;
+    if (cats.length) {
+      let linha = "Categorias: ";
+      cats.forEach((c, idx) => {
+        const frag = `${c}: ${categorias[c].toFixed(2)} €${idx < cats.length - 1 ? " · " : ""}`;
+        if (linha.length + frag.length > 95) {
+          doc.text(linha, 10, cy);
+          cy += 4;
+          linha = "";
+        }
+        linha += frag;
+      });
+      if (linha) doc.text(linha, 10, cy);
+    }
+
+    // assinatura
+    doc.setFontSize(7);
+    doc.setTextColor(140, 110, 88);
+    doc.text("Management Money · relatório financeiro pessoal gerado automaticamente", 105, 298, { align: "center" });
+
+    doc.save("management_money.pdf");
+  }
+
+  // -------------------- GESTOR INTELIGENTE --------------------
+  function atualizarSmartUI() {
+    const tipo = document.getElementById("smartTipo").value;
+    const a = document.getElementById("smartPeriodoA");
+    const b = document.getElementById("smartPeriodoB");
+    const hintA = document.getElementById("smartHintA");
+    const hintB = document.getElementById("smartHintB");
+
+    if (tipo === "DIA") {
+      a.type = "date";
+      b.type = "date";
+      hintA.textContent = "Escolhe o dia para o período A.";
+      hintB.textContent = "Escolhe o dia para o período B.";
+    } else if (tipo === "MES") {
+      a.type = "month";
+      b.type = "month";
+      hintA.textContent = "Escolhe o mês de referência para o período A.";
+      hintB.textContent = "Escolhe o mês para comparar com o período A.";
+    } else {
+      a.type = "number";
+      b.type = "number";
+      a.min = "2000";
+      b.min = "2000";
+      a.max = "2100";
+      b.max = "2100";
+      hintA.textContent = "Ano do período A (ex: 2024).";
+      hintB.textContent = "Ano do período B (ex: 2025).";
+    }
+  }
+
+  function calcularIndicadoresPeriodoSmart(tipo, valor) {
+    const session = getSession();
+    const trans = session.transacoes || [];
+    let filtradas = [];
+    const user = getCurrentUser();
+
+    if (tipo === "DIA") {
+      const diaISO = valor;
+      const mesRef = diaISO.slice(0, 7);
+      filtradas = trans.filter(t => t.dataISO === diaISO);
+
+      const cfg = obterConfigMes(mesRef);
+      const salMes = Number(cfg.rendimentoMensal) || 0;
+      let despesas = 0;
+      let extras = 0;
+      for (const t of filtradas) {
+        if (t.tipo === "DESPESA") despesas += t.valor;
+        if (t.tipo === "RECEITA_EXTRA") extras += t.valor;
+      }
+      const d = parseInt(diaISO.slice(8, 10), 10);
+      let salDia = 0;
+      if (d === user.salaryDay) salDia = salMes;
+
+      const entrada = salDia + extras;
+      const saldo = entrada - despesas;
+
+      return { label: formatarDataCurta(diaISO), despesas, extras, salario: salDia, saldo };
+    }
+
+    if (tipo === "MES") {
+      const mesRef = valor;
+      filtradas = trans.filter(t => t.mesRef === mesRef);
+      const cfg = obterConfigMes(mesRef);
+      const salMes = Number(cfg.rendimentoMensal) || 0;
+      let despesas = 0;
+      let extras = 0;
+      for (const t of filtradas) {
+        if (t.tipo === "DESPESA") despesas += t.valor;
+        if (t.tipo === "RECEITA_EXTRA") extras += t.valor;
+      }
+      const entrada = salMes + extras;
+      const saldo = entrada - despesas;
+      return { label: mesRef, despesas, extras, salario: salMes, saldo };
+    }
+
+    // ANO
+    const anoStr = String(valor);
+    filtradas = trans.filter(t => t.dataISO.startsWith(anoStr + "-"));
+    const mapMes = {};
+    for (const t of filtradas) {
+      const mesRef = t.mesRef;
+      if (!mapMes[mesRef]) {
+        const cfg = obterConfigMes(mesRef);
+        mapMes[mesRef] = {
+          salario: Number(cfg.rendimentoMensal) || 0,
+          despesas: 0,
+          extras: 0
+        };
+      }
+      if (t.tipo === "DESPESA") mapMes[mesRef].despesas += t.valor;
+      if (t.tipo === "RECEITA_EXTRA") mapMes[mesRef].extras += t.valor;
+    }
+    let salario = 0;
+    let despesas = 0;
+    let extras = 0;
+    for (const m of Object.values(mapMes)) {
+      salario += m.salario;
+      despesas += m.despesas;
+      extras += m.extras;
+    }
+    const saldo = salario + extras - despesas;
+    return { label: anoStr, despesas, extras, salario, saldo };
+  }
+
+  function renderResumoSmart(el, ind) {
+    el.innerHTML = `
+      <h4>${ind.label}</h4>
+      <p><strong>Poupança líquida:</strong> ${formatarMoeda(ind.saldo)}</p>
+      <p><strong>Despesas:</strong> ${formatarMoeda(ind.despesas)} ·
+         <strong>Extras:</strong> ${formatarMoeda(ind.extras)} ·
+         <strong>Salário:</strong> ${formatarMoeda(ind.salario)}</p>
+    `;
+  }
+
+  function gerarInsightsSmart(a, b) {
+    const linhas = [];
+
+    const deltaSaldo = b.saldo - a.saldo;
+    if (deltaSaldo > 0) {
+      linhas.push(
+        `No período B poupaste ${formatarMoeda(
+          deltaSaldo
+        )} mais do que no período A. Mantém este ritmo!`
+      );
+    } else if (deltaSaldo < 0) {
+      linhas.push(
+        `No período B poupaste ${formatarMoeda(
+          -deltaSaldo
+        )} menos do que no período A. Vale a pena rever algumas categorias de gasto.`
+      );
+    } else {
+      linhas.push("A poupança líquida foi muito semelhante entre os dois períodos.");
+    }
+
+    const deltaDesp = b.despesas - a.despesas;
+    if (deltaDesp > 0) {
+      linhas.push(
+        `As despesas aumentaram ${formatarMoeda(
+          deltaDesp
+        )} no período B. Procura reduzir pequenos gastos diários para compensar.`
+      );
+    } else if (deltaDesp < 0) {
+      linhas.push(
+        `Conseguiste reduzir as despesas em ${formatarMoeda(
+          -deltaDesp
+        )} no período B. Excelente controlo!`
+      );
+    }
+
+    const deltaExtras = b.extras - a.extras;
+    if (deltaExtras > 0) {
+      linhas.push(
+        `Os recebimentos extra cresceram ${formatarMoeda(
+          deltaExtras
+        )} no período B. Considera direcionar parte deles diretamente para poupança.`
+      );
+    } else if (deltaExtras < 0) {
+      linhas.push(
+        `Tiveste menos recebimentos extra no período B. Isso torna ainda mais importante o controlo de despesas.`
+      );
+    }
+
+    if (!linhas.length) {
+      linhas.push(
+        "Os dois períodos são muito semelhantes. Foca-te em pequenos ajustes: 1 ou 2 categorias de despesa podem fazer a diferença."
+      );
+    }
+
+    return linhas;
+  }
+
+  function handleSmartComparacao(e) {
+    e.preventDefault();
+    const tipo = document.getElementById("smartTipo").value;
+    const aVal = document.getElementById("smartPeriodoA").value;
+    const bVal = document.getElementById("smartPeriodoB").value;
+
+    if (!aVal || !bVal) {
+      mostrarToast("Escolhe os dois períodos a comparar.");
+      return;
+    }
+
+    const indA = calcularIndicadoresPeriodoSmart(tipo, aVal);
+    const indB = calcularIndicadoresPeriodoSmart(tipo, bVal);
+
+    renderResumoSmart(document.getElementById("smartResumoA"), indA);
+    renderResumoSmart(document.getElementById("smartResumoB"), indB);
+
+    const insights = gerarInsightsSmart(indA, indB);
+    const box = document.getElementById("smartInsights");
+    box.innerHTML =
+      "<strong>Insights inteligentes:</strong><ul>" +
+      insights.map(i => "<li>" + i + "</li>").join("") +
+      "</ul>";
+
+    ultimaComparacaoSmart = { tipo, aVal, bVal, indA, indB, insights };
+    document.getElementById("btnSmartExcel").disabled = false;
+    document.getElementById("btnSmartPDF").disabled = false;
+
+    const session = getSession();
+    session.smartComparacoes.unshift(ultimaComparacaoSmart);
+    if (session.smartComparacoes.length > 30) session.smartComparacoes.pop();
+    saveState();
+  }
+
+  function exportarSmartExcel() {
+    if (!ultimaComparacaoSmart) return;
+    const { tipo, indA, indB, insights } = ultimaComparacaoSmart;
+
+    let html = "<table border='1'>";
+    html += `<tr><th colspan='4'>Management Money · Comparação ${tipo}</th></tr>`;
+    html += `<tr><th>Indicador</th><th>Período A (${indA.label})</th><th>Período B (${indB.label})</th><th>Diferença (B - A)</th></tr>`;
+
+    function linha(nome, k) {
+      const diff = indB[k] - indA[k];
+      html += `<tr><td>${nome}</td><td>${indA[k].toFixed(
+        2
+      )}</td><td>${indB[k].toFixed(2)}</td><td>${diff.toFixed(2)}</td></tr>`;
+    }
+
+    linha("Poupança líquida", "saldo");
+    linha("Despesas", "despesas");
+    linha("Extras", "extras");
+    linha("Salário", "salario");
+
+    html += "</table><br/><table border='1'><tr><th>Insights</th></tr>";
+    insights.forEach(i => (html += `<tr><td>${i}</td></tr>`));
+    html += "</table>";
+
+    const blob = new Blob([html], { type: "application/vnd.ms-excel" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "management_money_comparacao.xls";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportarSmartPDF() {
+    if (!ultimaComparacaoSmart) return;
+    const { tipo, indA, indB, insights } = ultimaComparacaoSmart;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "mm", "a4");
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(18);
+    doc.text("Management Money", 105, 15, { align: "center" });
+    doc.setFontSize(13);
+    doc.text(`Comparação ${tipo}`, 105, 22, { align: "center" });
+
+    let y = 32;
+    doc.setFontSize(10);
+    doc.text(`Período A: ${indA.label}`, 10, y);
+    y += 5;
+    doc.text(`Período B: ${indB.label}`, 10, y);
+    y += 8;
+
+    function linha(nome, a, b) {
+      const diff = b - a;
+      doc.text(
+        `${nome}: A = ${a.toFixed(2)} · B = ${b.toFixed(
+          2
+        )} · Diferença (B - A) = ${diff.toFixed(2)}`,
+        10,
+        y
+      );
+      y += 5;
+    }
+
+    linha("Poupança líquida", indA.saldo, indB.saldo);
+    linha("Despesas", indA.despesas, indB.despesas);
+    linha("Extras", indA.extras, indB.extras);
+    linha("Salário", indA.salario, indB.salario);
+
+    y += 4;
+    doc.text("Insights:", 10, y);
+    y += 5;
+
+    doc.setFontSize(10);
+    insights.forEach(i => {
+      const split = doc.splitTextToSize(i, 185);
+      split.forEach(line => {
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(line, 10, y);
+        y += 4;
+      });
+      y += 1;
+    });
+
+    doc.save("management_money_comparacao.pdf");
+  }
+
+  // -------------------- ASSISTENTE (CHATBOT) --------------------
+  function inicializarAssistente() {
+    const msgsEl = document.getElementById("assistantMessages");
+    msgsEl.innerHTML = "";
+    adicionarMsgAssistente(
+      "Olá! Sou o teu assistente de poupança. Posso explicar o teu limite diário, a tua poupança deste mês ou dizer-te em que categoria gastas mais."
+    );
+    atualizarAssistenteResumo();
+  }
+
+  function adicionarMsgUtilizador(texto) {
+    const msgs = document.getElementById("assistantMessages");
+    const div = document.createElement("div");
+    div.className = "assistant-msg assistant-msg-user";
+    div.textContent = "Tu: " + texto;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function adicionarMsgAssistente(texto) {
+    const msgs = document.getElementById("assistantMessages");
+    const div = document.createElement("div");
+    div.className = "assistant-msg assistant-msg-bot";
+    div.textContent = "Assistente: " + texto;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function atualizarAssistenteResumo() {
+    const mesRef = obterMesAtivo();
+    const resumo = calcularResumoMes(mesRef);
+    const trans = obterTransacoesMes(mesRef);
+    const catMap = {};
+    for (const t of trans) {
+      if (t.tipo !== "DESPESA") continue;
+      const c = t.categoria || "Outros";
+      catMap[c] = (catMap[c] || 0) + t.valor;
+    }
+    let catTop = null;
+    let maxVal = 0;
+    for (const [c, v] of Object.entries(catMap)) {
+      if (v > maxVal) {
+        maxVal = v;
+        catTop = c;
+      }
+    }
+    const resumoBase =
+      "Neste momento o teu limite diário é " +
+      formatarMoeda(resumo.limiteDiario) +
+      " e tens " +
+      formatarMoeda(resumo.disponivelParaGastar) +
+      " disponíveis para gastar neste mês.";
+    let extra = "";
+    if (catTop) {
+      extra =
+        ' A categoria onde gastas mais é "' +
+        catTop +
+        '" com ' +
+        formatarMoeda(maxVal) +
+        ".";
+    }
+    adicionarMsgAssistente(resumoBase + extra);
+  }
+
+  function responderAssistente(pergunta) {
+    const mesRef = obterMesAtivo();
+    const resumoMes = calcularResumoMes(mesRef);
+    const trans = obterTransacoesMes(mesRef);
+    const p = pergunta.toLowerCase();
+
+    if (p.includes("limite") || p.includes("gastar") || p.includes("diário")) {
+      return (
+        "O teu limite diário atual é " +
+        formatarMoeda(resumoMes.limiteDiario) +
+        ", com um total disponível de " +
+        formatarMoeda(resumoMes.disponivelParaGastar) +
+        " até ao próximo salário."
+      );
+    }
+
+    if (p.includes("poupan") || p.includes("poupar")) {
+      return (
+        "Este mês tens uma poupança estimada de " +
+        formatarMoeda(resumoMes.poupancaEstimada) +
+        " e uma taxa de poupança de " +
+        formatarPercentagem(resumoMes.taxaPoupanca) +
+        ". Se quiseres aumentar, tenta reduzir 5–10% nas tuas principais categorias de despesa."
+      );
+    }
+
+    if (p.includes("despes") || p.includes("gasto") || p.includes("categori")) {
+      const catMap = {};
+      for (const t of trans) {
+        if (t.tipo !== "DESPESA") continue;
+        const c = t.categoria || "Outros";
+        catMap[c] = (catMap[c] || 0) + t.valor;
+      }
+      let topCat = null;
+      let maxVal = 0;
+      for (const [c, v] of Object.entries(catMap)) {
+        if (v > maxVal) {
+          maxVal = v;
+          topCat = c;
+        }
+      }
+      if (!topCat) {
+        return "Ainda não tens despesas registadas neste mês. Adiciona algumas transações para eu analisar.";
+      }
+      return (
+        'A tua maior categoria de despesa neste mês é "' +
+        topCat +
+        '" com ' +
+        formatarMoeda(maxVal) +
+        ". Uma boa estratégia é definir um teto para essa categoria e registar sempre que gastas."
+      );
+    }
+
+    if (p.includes("salár") || p.includes("rendimento")) {
+      return (
+        "Estou a usar um rendimento mensal de " +
+        formatarMoeda(resumoMes.salarioMes) +
+        ". Podes ajustá-lo na secção de configuração do mês para teres projeções mais realistas."
+      );
+    }
+
+    return "Não percebi totalmente a pergunta, mas posso ajudar com limite diário, poupança, despesas por categoria ou comparação de períodos no Gestor inteligente.";
+  }
+
+  // -------------------- EVENTOS INIT --------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    loadState();
+
+    // Auth tabs
+    document
+      .querySelectorAll(".auth-tab-button")
+      .forEach(btn =>
+        btn.addEventListener("click", () => trocarTabAuth(btn.dataset.authTab))
+      );
+
+    document
+      .getElementById("formRegister")
+      .addEventListener("submit", handleRegister);
+    document
+      .getElementById("formLogin")
+      .addEventListener("submit", handleLogin);
+    document
+      .getElementById("formRecuperar")
+      .addEventListener("submit", handleResetPassword);
+
+    document
+      .getElementById("btnMostrarRecuperar")
+      .addEventListener("click", () => {
+        const box = document.getElementById("recuperarBox");
+        box.style.display = box.style.display === "none" ? "block" : "none";
+      });
+
+    // Modal confirm
+    document
+      .getElementById("modalCancel")
+      .addEventListener("click", fecharModal);
+    document
+      .getElementById("modalConfirm")
+      .addEventListener("click", () => {
+        if (modalCallbackConfirm) modalCallbackConfirm();
+        fecharModal();
+      });
+    document
+      .getElementById("appModal")
+      .addEventListener("click", e => {
+        if (e.target.id === "appModal") fecharModal();
+      });
+
+    // Notificações
+    document
+      .getElementById("btnNotifications")
+      .addEventListener("click", abrirNotificacoes);
+    document
+      .getElementById("btnFecharNotificacoes")
+      .addEventListener("click", fecharNotificacoes);
+    document
+      .getElementById("btnLimparNotificacoes")
+      .addEventListener("click", limparNotificacoes);
+    document
+      .getElementById("notificationsOverlay")
+      .addEventListener("click", e => {
+        if (e.target.id === "notificationsOverlay") fecharNotificacoes();
+      });
+
+    // Modal editar transação
+    document
+      .getElementById("btnCancelarEditarTrans")
+      .addEventListener("click", fecharModalEditarTransacao);
+    document
+      .getElementById("editTransOverlay")
+      .addEventListener("click", e => {
+        if (e.target.id === "editTransOverlay") fecharModalEditarTransacao();
+      });
+    document
+      .getElementById("formEditarTransacao")
+      .addEventListener("submit", handleEditarTransacaoSubmit);
+
+    // Logout
+    document
+      .getElementById("btnLogout")
+      .addEventListener("click", logout);
+
+    // Navegação principal
+    document.querySelectorAll(".nav-button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        trocarSecao(btn.dataset.sectionTarget);
+      });
+    });
+
+    // Tabs de poupança
+    document.querySelectorAll(".savings-tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        savingsView = btn.dataset.view;
+        atualizarSavingsNav();
+      });
+    });
+
+    // Config mês
+    document
+      .getElementById("formConfigMes")
+      .addEventListener("submit", guardarConfigMes);
+    document
+      .getElementById("btnReporValores")
+      .addEventListener("click", reporValoresMes);
+
+    document
+      .getElementById("mesReferencia")
+      .addEventListener("change", e => {
+        const val = e.target.value || obterMesAtualISO();
+        setMesAtivo(val);
+        selectedCalendarDate = null;
+        atualizarTudo();
+      });
+
+    // Calendário: clique em dia
+    document
+      .getElementById("calendarGrid")
+      .addEventListener("click", e => {
+        const cell = e.target.closest(".calendar-day");
+        if (!cell || cell.classList.contains("calendar-day-empty")) return;
+        selectedCalendarDate = cell.dataset.date;
+        atualizarCalendario();
+        atualizarDashboard();
+        atualizarTabelaCalendario();
+        atualizarGraficos();
+        atualizarSavingsNav();
+      });
+
+    // Transações
+    document
+      .getElementById("formTransacao")
+      .addEventListener("submit", handleNovaTransacao);
+    document
+      .getElementById("btnLimparTransacoesMes")
+      .addEventListener("click", limparTransacoesMesAtual);
+
+    // Ações de edição/remoção nas tabelas
+    document
+      .getElementById("tbodyTransacoes")
+      .addEventListener("click", e => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+        if (action === "edit") {
+          abrirModalEditarTransacao(id);
+        } else if (action === "delete") {
+          abrirModalConfirm(
+            "Eliminar transação",
+            "Tens a certeza que queres eliminar esta transação?",
+            () => eliminarTransacao(id)
+          );
+        }
+      });
+
+    document
+      .getElementById("tbodyCalendario")
+      .addEventListener("click", e => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+        if (action === "edit") {
+          abrirModalEditarTransacao(id);
+        } else if (action === "delete") {
+          abrirModalConfirm(
+            "Eliminar transação",
+            "Tens a certeza que queres eliminar esta transação?",
+            () => eliminarTransacao(id)
+          );
+        }
+      });
+
+    // Relatórios
+    document
+      .getElementById("visaoRelatorios")
+      .addEventListener("change", atualizarGraficos);
+
+    // Export
+    document
+      .getElementById("btnExportarExcel")
+      .addEventListener("click", exportarExcel);
+    document
+      .getElementById("btnExportarPDF")
+      .addEventListener("click", exportarPDF);
+
+    // Gestor inteligente
+    document
+      .getElementById("smartTipo")
+      .addEventListener("change", atualizarSmartUI);
+    atualizarSmartUI();
+
+    document
+      .getElementById("formSmartComparacao")
+      .addEventListener("submit", handleSmartComparacao);
+    document
+      .getElementById("btnSmartExcel")
+      .addEventListener("click", exportarSmartExcel);
+    document
+      .getElementById("btnSmartPDF")
+      .addEventListener("click", exportarSmartPDF);
+
+    
+    // Importação de documentos (Transações e Gestor inteligente)
+    const btnImportarTransacoes = document.getElementById("btnImportarTransacoes");
+    if (btnImportarTransacoes) {
+      btnImportarTransacoes.addEventListener("click", () => {
+        processarUploadsTransacoes("transUpload");
+      });
+    }
+
+    const btnDownloadTemplateTransacoes = document.getElementById("btnDownloadTemplateTransacoes");
+    if (btnDownloadTemplateTransacoes) {
+      btnDownloadTemplateTransacoes.addEventListener("click", () => {
+        descarregarTemplateTransacoes();
+      });
+    }
+
+    const btnSmartImportar = document.getElementById("btnSmartImportar");
+    if (btnSmartImportar) {
+      btnSmartImportar.addEventListener("click", () => {
+        processarUploadsTransacoes("smartUpload");
+      });
+    }
+
+    const btnSmartTemplate = document.getElementById("btnSmartTemplate");
+    if (btnSmartTemplate) {
+      btnSmartTemplate.addEventListener("click", () => {
+        descarregarTemplateTransacoes();
+      });
+    }
+
+// Assistente
+    document
+      .getElementById("assistantToggle")
+      .addEventListener("click", () => {
+        document
+          .getElementById("assistantPanel")
+          .classList.toggle("active");
+      });
+
+    const assistantClose = document.getElementById("assistantClose");
+    if (assistantClose) {
+      assistantClose.addEventListener("click", () => {
+        document.getElementById("assistantPanel").classList.remove("active");
+      });
+    }
+
+    document
+      .getElementById("assistantForm")
+      .addEventListener("submit", e => {
+        e.preventDefault();
+        const input = document.getElementById("assistantInput");
+        const texto = input.value.trim();
+        if (!texto) return;
+        adicionarMsgUtilizador(texto);
+        const resposta = responderAssistente(texto);
+        adicionarMsgAssistente(resposta);
+        input.value = "";
+      });
+
+    // Se já houver sessão e o utilizador tiver escolhido manter login
+    const user = getCurrentUser();
+    if (user && user.rememberLogin) {
+      iniciarAppDepoisLogin();
+    } else {
+      if (user && !user.rememberLogin) {
+        rootState.currentUserId = null;
+        saveState();
+      }
+    }
+  });
+</script>
+</body>
+</html>
